@@ -115,11 +115,18 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	})
 }
 
+// Collect returns unique keys with a default value.
+func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
+	m := map[K]V{}
+	for key := range keys {
+		m[key] = value
+	}
+	return m
+}
+
 // Set returns unique keys with an empty struct value.
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
-	m := MapSet[K, struct{}]{}
-	m.Add(keys...)
-	return m
+	return Collect(slices.Values(keys), struct{}{})
 }
 
 // Index returns unique keys with their first index position.

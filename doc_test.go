@@ -108,6 +108,12 @@ func ExampleUnique() {
 	// Output: [b a]
 }
 
+func ExampleCollect() {
+	k := slices.Values([]string{"b", "a", "b"})
+	fmt.Println(Collect(k, true))
+	// Output: map[a:true b:true]
+}
+
 func ExampleIndex() {
 	fmt.Println(Index(slices.Values([]string{"b", "a", "b"})))
 	// Output: map[a:1 b:0]
