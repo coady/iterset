@@ -12,11 +12,13 @@ So `iterset` is built around generic maps with `any` value type. Maps can be cas
 There are constructors for all common use cases.
 * `Cast` a map
 * `Unique` iterates keys in order
+* `Collect` with default value
 * `Set` from variadic args
 * `Index` retains original position
 * `Count` stores key counts
 * `IndexBy` stores values by key function
 * `GroupBy` stores slices grouped by key function
+* `Memoize` caches function call
 
 Methods support iterators, compatible with `slices.Values` and `maps.Keys`.
 * `IsSuperset`

@@ -3,6 +3,7 @@ package iterset
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -134,6 +135,11 @@ func ExampleGroupBy() {
 	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
 	fmt.Println(GroupBy(slices.Values(items), func(it item) string { return it.id }))
 	// Output: map[a:[{a}] b:[{b} {b}]]
+}
+
+func ExampleMemoize() {
+	fmt.Println(Memoize(slices.Values([]string{"b", "a", "b"}), strings.ToUpper))
+	// Output: map[a:A b:B]
 }
 
 func ExampleSorted() {

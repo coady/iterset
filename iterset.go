@@ -171,6 +171,17 @@ func GroupBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, [
 	return m
 }
 
+// Memoize caches function call.
+func Memoize[K comparable, V any](keys iter.Seq[K], f func(K) V) MapSet[K, V] {
+	m := MapSet[K, V]{}
+	for key := range keys {
+		if m.missing(key) {
+			m[key] = f(key)
+		}
+	}
+	return m
+}
+
 // Sorted returns keys sorted by values.
 // When used with [Index], this will retain the original key order.
 func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
