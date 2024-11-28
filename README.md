@@ -21,6 +21,8 @@ There are constructors for all common use cases.
 * `Memoize` caches function call
 
 Methods support iterators, compatible with `slices.Values` and `maps.Keys`.
+* `Equal`
+* `IsSubset`
 * `IsSuperset`
 * `IsDisjoint`
 * `Union`
