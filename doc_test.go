@@ -2,6 +2,7 @@ package iterset
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"testing"
@@ -103,6 +104,19 @@ func ExampleMapSet_Delete() {
 	// Output: 1
 }
 
+func ExampleMapSet_Union() {
+	m := map[string]int{"a": 0, "b": 1}
+	n := map[string]int{"b": 2, "c": 3}
+	fmt.Println(Cast(m).Union(maps.All(n)))
+	// Output: map[a:0 b:2 c:3]
+}
+
+func ExampleMapSet_SymmetricDifference() {
+	k := slices.Values([]string{"b", "c"})
+	fmt.Println(slices.Collect(Set("a", "b").SymmetricDifference(k)))
+	// Output: [c a]
+}
+
 func ExampleUnique() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(slices.Collect(Unique(k)))
@@ -154,5 +168,13 @@ func TestIter(t *testing.T) {
 	}
 	for range Set("b").Difference(k) {
 		break
+	}
+	for range Set("b").SymmetricDifference(k) {
+		break
+	}
+	for c := range Set("b").SymmetricDifference(k) {
+		if c == "b" {
+			break
+		}
 	}
 }

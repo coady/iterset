@@ -90,6 +90,15 @@ func (m MapSet[K, V]) Delete(keys ...K) {
 	}
 }
 
+// Union merges all keys with successive inserts.
+func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
+	m = maps.Clone(m)
+	for _, seq := range seqs {
+		maps.Insert(m, seq)
+	}
+	return m
+}
+
 // Intersect returns the ordered key-value pairs which are present in both.
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
@@ -106,6 +115,25 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 // Note the keys are from the "right" parameter. See [MapSet.Delete] for reverse.
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq[K] {
 	return filterFunc(keys, m.missing)
+}
+
+// SymmetricDifference returns.
+func (m MapSet[K, V]) SymmetricDifference(seq iter.Seq[K]) iter.Seq[K] {
+	s := Set[K]()
+	return func(yield func(K) bool) {
+		for key := range seq {
+			if m.contains(key) {
+				s.Add(key)
+			} else if !yield(key) {
+				return
+			}
+		}
+		for key := range m {
+			if !s.contains(key) && !yield(key) {
+				return
+			}
+		}
+	}
 }
 
 // Cast returns a zero-copy [MapSet].
