@@ -76,6 +76,13 @@ func (m MapSet[K, V]) Add(keys ...K) {
 	}
 }
 
+// Insert keys with default value.
+func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
+	for key := range keys {
+		m[key] = value
+	}
+}
+
 // Delete key(s).
 func (m MapSet[K, V]) Delete(keys ...K) {
 	for _, key := range keys {
@@ -117,10 +124,8 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 
 // Collect returns unique keys with a default value.
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
-	m := map[K]V{}
-	for key := range keys {
-		m[key] = value
-	}
+	m := MapSet[K, V]{}
+	m.Insert(keys, value)
 	return m
 }
 
