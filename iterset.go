@@ -1,4 +1,4 @@
-// Iterset implements set operations using maps and iterators.
+// Package iterset implements set operations using maps and iterators.
 package iterset
 
 import (
@@ -18,7 +18,6 @@ func filterFunc[E any](values iter.Seq[E], f func(E) bool) iter.Seq[E] {
 	}
 }
 
-// allFunc return whether all values pass the predicate function.
 func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
 	for value := range values {
 		if !f(value) {
@@ -58,7 +57,9 @@ func (m MapSet[K, V]) Missing(keys ...K) bool {
 	return !slices.ContainsFunc(keys, m.contains)
 }
 
-// Equal returns whether the key sets are equivalent.
+// Equal returns whether the key sets are equivalent. See also [maps.Equal].
+//   - time: O(k)
+//   - space: O(k)
 func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	s := Set[K]()
 	superset := allFunc(keys, func(key K) bool {
@@ -70,17 +71,21 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 
 // IsSubset returns whether no keys are missing.
 // Note [MapSet.IsSuperset] is more efficient if the keys are from a map.
+//   - time: Θ(k)
+//   - space: Θ(k)
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 	s := Collect(keys, struct{}{})
 	return len(m) <= len(s) && s.IsSuperset(maps.Keys(m))
 }
 
 // IsSuperset returns whether all keys are present.
+//   - time: O(k)
 func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.contains)
 }
 
 // IsDisjoint returns whether no keys are present.
+//   - time: O(k)
 func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.missing)
 }
@@ -93,7 +98,7 @@ func (m MapSet[K, V]) Add(keys ...K) {
 	}
 }
 
-// Insert keys with default value.
+// Insert keys with default value. See also [maps.Insert].
 func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
 	for key := range keys {
 		m[key] = value
@@ -108,6 +113,8 @@ func (m MapSet[K, V]) Delete(keys ...K) {
 }
 
 // Union merges all keys with successive inserts.
+//   - time: Θ(m+k)
+//   - space: Θ(m+k)
 func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 	m = maps.Clone(m)
 	for _, seq := range seqs {
@@ -117,6 +124,7 @@ func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 }
 
 // Intersect returns the ordered key-value pairs which are present in both.
+//   - time: O(k)
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		for key := range keys {
@@ -130,11 +138,14 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 
 // Difference returns the ordered keys which are not present in the map.
 // Note the keys are from the "right" parameter. See [MapSet.Delete] for reverse.
+//   - time: O(k)
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq[K] {
 	return filterFunc(keys, m.missing)
 }
 
-// SymmetricDifference returns.
+// SymmetricDifference returns keys which are not in both.
+//   - time: O(m+k)
+//   - space: O(min(m, k))
 func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	s := Set[K]()
 	return func(yield func(K) bool) {
@@ -159,6 +170,8 @@ func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 }
 
 // Unique returns keys in order without duplicates.
+//   - time: O(k)
+//   - space: O(k)
 func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	s := Set[K]()
 	return filterFunc(keys, func(key K) bool {
@@ -167,7 +180,7 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	})
 }
 
-// Collect returns unique keys with a default value.
+// Collect returns unique keys with a default value. See also [maps.Collect].
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 	m := MapSet[K, V]{}
 	m.Insert(keys, value)
