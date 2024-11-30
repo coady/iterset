@@ -136,10 +136,25 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 	}
 }
 
-// Difference returns the ordered keys which are not present in the map.
-// Note the keys are from the "right" parameter. See [MapSet.Delete] for reverse.
+// Difference returns the key-value pairs which are not present in the keys.
+// Note [MapSet.ReverseDifference] is more efficient if the keys are from a map.
+//   - time: Ω(k)..O(m+k)
+//   - space: O(min(m, k))
+func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
+	s := Collect(filterFunc(keys, m.contains), struct{}{})
+	return func(yield func(K, V) bool) {
+		for key, value := range m {
+			if s.missing(key) && !yield(key, value) {
+				return
+			}
+		}
+	}
+}
+
+// ReverseDifference returns the ordered keys which are not present in the map.
+// Also known as the relative complement.
 //   - time: O(k)
-func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq[K] {
+func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 	return filterFunc(keys, m.missing)
 }
 

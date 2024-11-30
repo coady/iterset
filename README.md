@@ -4,9 +4,9 @@
 # iterset
 [Golang](https://go.dev) set operations using maps and iterators.
 
-There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. This means slices, maps, and iterators have to be converted to sets. Which besides being inefficient, loses slice ordering and map values. Additionally since sets are not built-in, they realistically will always be secondary types. Even in languages with built-in sets, it is common to call set operations on keys while sill retaining data in a map.
+There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. This means slices, maps, and iterators have to be converted to sets. Which besides being inefficient, loses slice ordering and map values. Additionally since sets are not built-in, they realistically will always be secondary types. Even in languages with built-in sets, it is common to call set operations on keys while still retaining data in a map.
 
-So `iterset` is built around generic maps with `any` value type. Maps can be casted without copying, and the methods support set operations which integrate with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices). Additionally the methods support iterators for further efficiency. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset) which allow iterables in methods.
+So `iterset` is built around generic maps with `any` value type. Maps can be casted without copying, and the methods support set operations which integrate with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices). Additionally the methods support iterators for further efficiency. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), which allow iterables in methods.
 
 ## Usage
 There are constructors for all common use cases.
@@ -28,6 +28,7 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`.
 * `Union`
 * `Intersect`
 * `Difference`
+* `ReverseDifference`
 * `SymmetricDifference`
 
 Scalar operations can be passed as bound methods for functional programming. 

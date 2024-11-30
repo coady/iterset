@@ -52,7 +52,7 @@ func Example_slice() {
 		}
 	}
 	// Whereas `iterset` methods have in-lined logic with minimal copying.
-	for c := range Set(x...).Difference(slices.Values(y)) {
+	for c := range Set(x...).ReverseDifference(slices.Values(y)) {
 		fmt.Println(c)
 	}
 	// Output:
@@ -123,6 +123,12 @@ func ExampleMapSet_Union() {
 	// Output: map[a:0 b:2 c:3]
 }
 
+func ExampleMapSet_Difference() {
+	k := slices.Values([]string{"b", "c"})
+	fmt.Println(maps.Collect(Set("a", "b").Difference(k)))
+	// Output: map[a:{}]
+}
+
 func ExampleMapSet_SymmetricDifference() {
 	k := slices.Values([]string{"b", "c"})
 	fmt.Println(slices.Collect(Set("a", "b").SymmetricDifference(k)))
@@ -179,6 +185,9 @@ func TestIter(t *testing.T) {
 		break
 	}
 	for range Set("b").Difference(k) {
+		break
+	}
+	for range Set("b").ReverseDifference(k) {
 		break
 	}
 	for range Set("b").SymmetricDifference(k) {
