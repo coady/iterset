@@ -5,7 +5,7 @@
 # iterset
 [Golang](https://go.dev) set operations using maps and iterators.
 
-There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. In practice this has many downsides.
+There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. In practice this has downsides.
 * Maps must be copied even though they already support iteration and O(1) lookup.
 * Map values are lost.
 * Slices must be copied even if they would have only been iterated.
@@ -14,7 +14,7 @@ There are many `mapset` implementations available, but they restrict the values 
 
 Since sets are not built-in, they realistically will always be a secondary type. Even in languages with built-in sets, it is common to call set operations on keys while still keeping data in a map, and common to want to retain ordering.
 
-So `iterset` is built around generic maps with `any` value type. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), its methods also support iterators. This integrates well with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices), and addresses all the previous problems.
+So `iterset` is built around generic maps with `any` value type. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), its methods also support iterators. This integrates well with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices), and addresses the typical `mapset` issues.
 * Maps can be casted instead of copied.
 * Map values are kept without affecting set operations.
 * Slices can be iterated using `slices.Values` without copying.
@@ -33,7 +33,7 @@ There are constructors for all common use cases.
 * `GroupBy` stores slices grouped by key function
 * `Memoize` caches function call
 
-Methods support iterators, compatible with `slices.Values` and `maps.Keys`.
+Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Implementations are asymptotically optimal, and exit early where relevant.
 * `Equal`
 * `IsSubset`
 * `IsSuperset`
@@ -50,6 +50,11 @@ Scalar operations can be passed as bound methods for functional programming.
 * `Missing`
 * `Add`
 * `Delete`
+
+Some operations are better expressed as functions, to avoid making unnecessary maps.
+* `Sorted`
+* `IsSubset`
+* `Difference`
 
 ## Installation
 No dependencies. [Go 1.23](https://go.dev/doc/go1.23) required.

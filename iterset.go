@@ -27,7 +27,7 @@ func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
 	return true
 }
 
-// MapSet is a `map` subtype with set methods.
+// MapSet is a `map` extended with set methods.
 type MapSet[K comparable, V any] map[K]V
 
 // Get returns the key's value. A convenience method that can be passed as an argument.
@@ -71,11 +71,20 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 
 // IsSubset returns whether no keys are missing.
 // Note [MapSet.IsSuperset] is more efficient if the keys are from a map.
+// [IsSubset] is more efficient if the receiver was not originally a map.
 //   - time: Θ(k)
 //   - space: Θ(k)
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 	s := Collect(keys, struct{}{})
 	return len(m) <= len(s) && s.IsSuperset(maps.Keys(m))
+}
+
+// IsSubset returns whether all keys in seq1 are in seq2.
+// Note [MapSet.IsSuperset] is more efficient if seq2 is from a map.
+//   - time: Θ(k)
+//   - space: Θ(k)
+func IsSubset[K comparable](seq1, seq2 iter.Seq[K]) bool {
+	return Collect(seq2, struct{}{}).IsSuperset(seq1)
 }
 
 // IsSuperset returns whether all keys are present.
@@ -138,6 +147,7 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 
 // Difference returns the key-value pairs which are not present in the keys.
 // Note [MapSet.ReverseDifference] is more efficient if the keys are from a map.
+// [Difference] is more efficient if the receiver was not originally a map.
 //   - time: Ω(k)..O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
@@ -149,6 +159,14 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 			}
 		}
 	}
+}
+
+// Difference returns keys in seq1 that are not in seq2.
+// Note [MapSet.ReverseDifference] is more efficient if seq2 is from a map.
+//   - time: Θ(k)
+//   - space: Θ(k)
+func Difference[K comparable](seq1, seq2 iter.Seq[K]) iter.Seq[K] {
+	return Collect(seq2, struct{}{}).ReverseDifference(seq1)
 }
 
 // ReverseDifference returns the ordered keys which are not present in the map.
@@ -180,6 +198,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 }
 
 // Cast returns a zero-copy [MapSet].
+// Equivalent to `MapSet[K, V](m)` without having to specify concrete types.
 func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 	return m
 }

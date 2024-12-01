@@ -85,6 +85,7 @@ func Example_unique() {
 		}
 		m[c] = true
 	}
+	fmt.Println(keys)
 	// A typical `mapset` would either have no impact on readability, or lose ordering.
 	// Whereas `iterset` has this built-in with lazy iteration.
 	for c := range Unique(slices.Values(values)) {
@@ -95,6 +96,7 @@ func Example_unique() {
 	fmt.Println(idx)
 	fmt.Println(Sorted(idx)) // keys sorted by value
 	// Output:
+	// [a b]
 	// a
 	// b
 	// map[a:0 b:1]
@@ -128,6 +130,13 @@ func ExampleMapSet_Equal() {
 func ExampleMapSet_IsSubset() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Set("a").IsSubset(k), Set("a", "c").IsSubset(k))
+	// Output: true false
+}
+
+func ExampleIsSubset() {
+	s1 := slices.Values([]string{"a"})
+	s2 := slices.Values([]string{"a", "b"})
+	fmt.Println(IsSubset(s1, s2), IsSubset(s2, s1))
 	// Output: true false
 }
 
@@ -168,6 +177,13 @@ func ExampleMapSet_Difference() {
 	k := slices.Values([]string{"b", "c"})
 	fmt.Println(maps.Collect(Set("a", "b").Difference(k)))
 	// Output: map[a:{}]
+}
+
+func ExampleDifference() {
+	s1 := slices.Values([]string{"a", "b"})
+	s2 := slices.Values([]string{"b", "c"})
+	fmt.Println(slices.Collect(Difference(s1, s2)))
+	// Output: [a]
 }
 
 func ExampleMapSet_SymmetricDifference() {
