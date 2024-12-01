@@ -11,7 +11,7 @@ import (
 type item struct{ id string }
 
 // Intersect a map with a slice of keys, retaining original order.
-func Example_map() {
+func Example_intersect() {
 	data := map[string]int{"a": 0, "b": 1, "c": 2}
 	keys := []string{"d", "c", "b"}
 	// With no sets.
@@ -21,8 +21,15 @@ func Example_map() {
 			fmt.Println(key, value)
 		}
 	}
-	// Using a typical `mapset` would be inefficient and only change the `Contains` lookup.
-	// Whereas `iterset` methods have in-lined logic with zero copying.
+	// A typical `mapset` would copy `data`, and have no impact on readability.
+	s := Set(slices.Collect(maps.Keys(data))...)
+	for _, key := range keys {
+		if s.Contains(key) {
+			fmt.Println(key, data[key])
+		}
+	}
+	// Using an intersect method would also copy `keys`, and lose ordering.
+	// Whereas `iterset` methods have in-lined logic with zero copying and lazy iteration.
 	for key, value := range Cast(data).Intersect(slices.Values(keys)) {
 		fmt.Println(key, value)
 	}
@@ -31,33 +38,67 @@ func Example_map() {
 	// b 1
 	// c 2
 	// b 1
+	// c 2
+	// b 1
 }
 
-// Difference between two slices while, retaining original order.
-func Example_slice() {
-	x, y := []string{"a", "b", "c"}, []string{"e", "d", "c"}
+// Is one slice a superset of another?
+func Example_superset() {
+	left, right := []string{"a", "b", "c"}, []string{"b", "c", "d"}
 	// With no sets.
 	m := map[string]bool{}
-	for _, c := range x {
+	for _, c := range left {
 		m[c] = true
 	}
-	for _, c := range y {
+	isSuperset := true
+	for _, c := range right {
 		if !m[c] {
+			isSuperset = false
+			break
 		}
 	}
-	// Using a typical `mapset` only solves half the problem.
-	s := Set(x...)
-	for _, c := range y {
-		if !s.Contains(c) {
+	fmt.Println(isSuperset)
+	// Or in functional style.
+	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !m[c] }))
+	// A typical `mapset` would copy both slices, which makes early exits irrelevant.
+	// Or it only solves half the problem.
+	s := Set(left...)
+	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !s.Contains(c) }))
+	// Whereas `iterset` methods have in-lined logic with minimal copying and early exits.
+	fmt.Println(Set(left...).IsSuperset(slices.Values(right)))
+	// Output:
+	// false
+	// false
+	// false
+	// false
+}
+
+// Remove duplicates, retaining original order.
+func Example_unique() {
+	values := []string{"a", "b", "a"}
+	// With no sets.
+	m := map[string]bool{}
+	keys := []string{}
+	for _, c := range values {
+		if !m[c] {
+			keys = append(keys, c)
 		}
+		m[c] = true
 	}
-	// Whereas `iterset` methods have in-lined logic with minimal copying.
-	for c := range Set(x...).ReverseDifference(slices.Values(y)) {
+	// A typical `mapset` would either have no impact on readability, or lose ordering.
+	// Whereas `iterset` has this built-in with lazy iteration.
+	for c := range Unique(slices.Values(values)) {
 		fmt.Println(c)
 	}
+	// What if a `set` is still needed, in addition to ordering.
+	idx := Index(slices.Values(values))
+	fmt.Println(idx)
+	fmt.Println(Sorted(idx)) // keys sorted by value
 	// Output:
-	// e
-	// d
+	// a
+	// b
+	// map[a:0 b:1]
+	// [a b]
 }
 
 func ExampleMapSet_Get() {

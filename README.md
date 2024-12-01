@@ -1,12 +1,25 @@
 [![build](https://github.com/coady/iterset/actions/workflows/build.yml/badge.svg)](https://github.com/coady/iterset/actions/workflows/build.yml)
-[![image](https://codecov.io/gh/coady/iterset/branch/main/graph/badge.svg)](https://codecov.io/gh/coady/iterset/)
+[![codecov](https://codecov.io/gh/coady/iterset/branch/main/graph/badge.svg)](https://codecov.io/gh/coady/iterset/)
+[![go report](https://goreportcard.com/badge/github.com/coady/iterset)](https://goreportcard.com/report/github.com/coady/iterset)
 
 # iterset
 [Golang](https://go.dev) set operations using maps and iterators.
 
-There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. This means slices, maps, and iterators have to be converted to sets. Which besides being inefficient, loses slice ordering and map values. Additionally since sets are not built-in, they realistically will always be secondary types. Even in languages with built-in sets, it is common to call set operations on keys while still retaining data in a map.
+There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. In practice this has many downsides.
+* Maps must be copied even though they already support iteration and O(1) lookup.
+* Map values are lost.
+* Slices must be copied even if they would have only been iterated.
+* Slice ordering is lost.
+* Copying effectively means no early exits, e.g., in a subset check.
 
-So `iterset` is built around generic maps with `any` value type. Maps can be casted without copying, and the methods support set operations which integrate with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices). Additionally the methods support iterators for further efficiency. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), which allow iterables in methods.
+Since sets are not built-in, they realistically will always be a secondary type. Even in languages with built-in sets, it is common to call set operations on keys while still keeping data in a map, and common to want to retain ordering.
+
+So `iterset` is built around generic maps with `any` value type. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), its methods also support iterators. This integrates well with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices), and addresses all the previous problems.
+* Maps can be casted instead of copied.
+* Map values are kept without affecting set operations.
+* Slices can be iterated using `slices.Values` without copying.
+* Slice iterators retain ordering.
+* Iterators are lazily evaluated, inherently supporting early exits.
 
 ## Usage
 There are constructors for all common use cases.
