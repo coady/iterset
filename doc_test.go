@@ -241,11 +241,17 @@ func TestIter(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
+	for c := range Index(k).Difference(k) {
+		t.Errorf("should be empty: %s", c)
+	}
 	for range Set("b").Difference(k) {
 		break
 	}
 	for range Set("b").ReverseDifference(k) {
 		break
+	}
+	for c := range Index(k).SymmetricDifference(k) {
+		t.Errorf("should be empty: %s", c)
 	}
 	for range Set("b").SymmetricDifference(k) {
 		break

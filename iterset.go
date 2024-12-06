@@ -59,7 +59,7 @@ func (m MapSet[K, V]) Missing(keys ...K) bool {
 
 // Equal returns whether the key sets are equivalent. See also [maps.Equal].
 //   - time: O(k)
-//   - space: O(k)
+//   - space: O(min(m, k))
 func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	s := Set[K]()
 	superset := allFunc(keys, func(key K) bool {
@@ -73,10 +73,10 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 // Note [MapSet.IsSuperset] is more efficient if the keys are from a map.
 // [IsSubset] is more efficient if the receiver was not originally a map.
 //   - time: Θ(k)
-//   - space: Θ(k)
+//   - space: O(min(m, k))
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
-	s := Collect(keys, struct{}{})
-	return len(m) <= len(s) && s.IsSuperset(maps.Keys(m))
+	s := Collect(filterFunc(keys, m.contains), struct{}{})
+	return len(m) == len(s)
 }
 
 // IsSubset returns whether all keys in seq1 are in seq2.
@@ -153,6 +153,9 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	s := Collect(filterFunc(keys, m.contains), struct{}{})
 	return func(yield func(K, V) bool) {
+		if len(m) == len(s) {
+			return
+		}
 		for key, value := range m {
 			if s.missing(key) && !yield(key, value) {
 				return
@@ -188,6 +191,9 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 			} else if !yield(key) {
 				return
 			}
+		}
+		if len(m) == len(s) {
+			return
 		}
 		for key := range m {
 			if s.missing(key) && !yield(key) {
