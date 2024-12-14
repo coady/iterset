@@ -54,6 +54,7 @@ Scalar operations can be passed as bound methods for functional programming.
 Some operations are better expressed as functions, to avoid making unnecessary maps.
 * `Sorted`
 * `IsSubset`
+* `Intersect`
 * `Difference`
 
 ## Installation
@@ -64,6 +65,8 @@ go get github.com/coady/iterset
 ```
 
 ## Tests
+100% code coverage.
+
 ```console
-go test .
+go test -cover
 ```

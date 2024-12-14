@@ -173,6 +173,13 @@ func ExampleMapSet_Union() {
 	// Output: map[a:0 b:2 c:3]
 }
 
+func ExampleIntersect() {
+	s1 := slices.Values([]string{"a", "b"})
+	s2 := slices.Values([]string{"b", "c"})
+	fmt.Println(slices.Collect(Intersect(s1, s2)))
+	// Output: [b]
+}
+
 func ExampleMapSet_Difference() {
 	k := slices.Values([]string{"b", "c"})
 	fmt.Println(maps.Collect(Set("a", "b").Difference(k)))
