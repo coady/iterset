@@ -234,6 +234,23 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	})
 }
 
+// UniqueBy is like [Unique] but uses a key function to compare values.
+// For values that compare equal, the first key-value pair is returned. See [IndexBy].
+//   - time: O(k)
+//   - space: O(k)
+func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, V] {
+	s := Set[K]()
+	return func(yield func(K, V) bool) {
+		for value := range values {
+			k := key(value)
+			if s.missing(k) && !yield(k, value) {
+				return
+			}
+			s.Add(k)
+		}
+	}
+}
+
 // Collect returns unique keys with a default value. See also [maps.Collect].
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 	m := MapSet[K, V]{}

@@ -10,6 +10,8 @@ import (
 
 type item struct{ id string }
 
+func (it item) Id() string { return it.id }
+
 // Intersect a map with a slice of keys, retaining original order.
 func Example_intersect() {
 	data := map[string]int{"a": 0, "b": 1, "c": 2}
@@ -205,6 +207,16 @@ func ExampleUnique() {
 	// Output: [b a]
 }
 
+func ExampleUniqueBy() {
+	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
+	for key, value := range UniqueBy(slices.Values(items), item.Id) {
+		fmt.Println(key, value)
+	}
+	// Output:
+	// b {b}
+	// a {a}
+}
+
 func ExampleCollect() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Collect(k, true))
@@ -223,13 +235,13 @@ func ExampleCount() {
 
 func ExampleIndexBy() {
 	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
-	fmt.Println(IndexBy(slices.Values(items), func(it item) string { return it.id }))
+	fmt.Println(IndexBy(slices.Values(items), item.Id))
 	// Output: map[a:{a} b:{b}]
 }
 
 func ExampleGroupBy() {
 	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
-	fmt.Println(GroupBy(slices.Values(items), func(it item) string { return it.id }))
+	fmt.Println(GroupBy(slices.Values(items), item.Id))
 	// Output: map[a:[{a}] b:[{b} {b}]]
 }
 
@@ -245,6 +257,9 @@ func ExampleSorted() {
 
 func TestIter(t *testing.T) {
 	k := slices.Values([]string{"a"})
+	for range UniqueBy(k, strings.TrimSpace) {
+		break
+	}
 	for range Set("a").Intersect(k) {
 		break
 	}
