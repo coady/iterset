@@ -217,6 +217,28 @@ func ExampleUniqueBy() {
 	// a {a}
 }
 
+func ExampleCompact() {
+	k := slices.Values([]string{"b", "b", "a", "a", "b"})
+	for key, count := range Compact(k) {
+		fmt.Println(key, count)
+	}
+	// Output:
+	// b 2
+	// a 2
+	// b 1
+}
+
+func ExampleCompactBy() {
+	items := []item{{id: "b"}, {id: "b"}, {id: "a"}, {id: "a"}, {id: "b"}}
+	for key, values := range CompactBy(slices.Values(items), item.Id) {
+		fmt.Println(key, values)
+	}
+	// Output:
+	// b [{b} {b}]
+	// a [{a} {a}]
+	// b [{b}]
+}
+
 func ExampleCollect() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Collect(k, true))
@@ -256,8 +278,14 @@ func ExampleSorted() {
 }
 
 func TestIter(t *testing.T) {
-	k := slices.Values([]string{"a"})
+	k := slices.Values([]string{"a", "A"})
 	for range UniqueBy(k, strings.TrimSpace) {
+		break
+	}
+	for range Compact(k) {
+		break
+	}
+	for range CompactBy(k, strings.TrimSpace) {
 		break
 	}
 	for range Set("a").Intersect(k) {

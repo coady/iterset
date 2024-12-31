@@ -73,3 +73,13 @@ func BenchmarkUnique(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkCompact(b *testing.B) {
+	_, k := setup(b)
+	s := slices.Values(slices.Sorted(k))
+	b.ResetTimer()
+	for range b.N {
+		for range Compact(s) {
+		}
+	}
+}

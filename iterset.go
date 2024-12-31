@@ -251,6 +251,53 @@ func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[
 	}
 }
 
+// Compact returns consecutive runs of deduplicated keys, with counts.
+// More efficient than [Unique] or [Count] if the keys are already grouped, e.g., sorted.
+//   - time: O(k)
+func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
+	var current K
+	count := 0
+	return func(yield func(K, int) bool) {
+		for key := range keys {
+			if count > 0 && key != current {
+				if !yield(current, count) {
+					return
+				}
+				count = 0
+			}
+			current = key
+			count += 1
+		}
+		if count > 0 {
+			yield(current, count)
+		}
+	}
+}
+
+// CompactBy is like [Compact] but uses a key function and collects all values.
+// More efficient than [UniqueBy] or [GroupBy] if the values are already grouped, e.g., sorted.
+//   - time: O(k)
+func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, []V] {
+	var current K
+	var group []V
+	return func(yield func(K, []V) bool) {
+		for value := range values {
+			k := key(value)
+			if group != nil && k != current {
+				if !yield(current, group) {
+					return
+				}
+				group = nil
+			}
+			current = k
+			group = append(group, value)
+		}
+		if group != nil {
+			yield(current, group)
+		}
+	}
+}
+
 // Collect returns unique keys with a default value. See also [maps.Collect].
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 	m := MapSet[K, V]{}

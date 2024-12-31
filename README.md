@@ -25,6 +25,7 @@ So `iterset` is built around generic maps with `any` value type. Inspired by [Py
 There are constructors for all common use cases.
 * `Cast` a map
 * `Unique{By}` iterates keys in order
+* `Compact{By}` iterates consecutive grouped keys
 * `Collect` with default value
 * `Set` from variadic args
 * `Index` retains original position
