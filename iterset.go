@@ -1,4 +1,4 @@
-// Package iterset implements set operations using maps and iterators.
+// Package iterset is a set library based on maps and iterators.
 package iterset
 
 import (
@@ -70,7 +70,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 }
 
 // IsSubset returns whether no keys are missing.
-// Note [MapSet.IsSuperset] is more efficient if the keys are from a map.
+// [MapSet.IsSuperset] is more efficient if the keys are from a map.
 // [IsSubset] is more efficient if the receiver was not originally a map.
 //   - time: Θ(k)
 //   - space: O(min(m, k))
@@ -80,7 +80,7 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 }
 
 // IsSubset returns whether all keys are present in the sequence.
-// Note [MapSet.IsSuperset] is more efficient if the sequence is from a map.
+// [MapSet.IsSuperset] is more efficient if the sequence is from a map.
 //   - time: Θ(k)
 //   - space: Θ(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
@@ -107,7 +107,7 @@ func (m MapSet[K, V]) Add(keys ...K) {
 	}
 }
 
-// Insert keys with default value. See also [maps.Insert].
+// Insert keys with default value. See also [maps.Insert] and [maps.Copy].
 func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
 	for key := range keys {
 		m[key] = value
@@ -121,9 +121,28 @@ func (m MapSet[K, V]) Delete(keys ...K) {
 	}
 }
 
+// Remove keys. Equivalent to [MapSet.Difference] in-place.
+func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
+	for key := range keys {
+		delete(m, key)
+	}
+}
+
+// Toggle removes present keys, and inserts missing keys.
+// Equivalent to [MapSet.SymmetricDifference] in-place.
+func (m MapSet[K, V]) Toggle(seq iter.Seq2[K, V]) {
+	for key, value := range seq {
+		if m.contains(key) {
+			delete(m, key)
+		} else {
+			m[key] = value
+		}
+	}
+}
+
 // Union merges all keys with successive inserts.
 //   - time: Θ(m+k)
-//   - space: Θ(m+k)
+//   - space: Ω(max(m, k))..O(m+k)
 func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 	m = maps.Clone(m)
 	for _, seq := range seqs {
@@ -146,7 +165,7 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 }
 
 // Intersect returns the ordered keys which are present in the sequence(s).
-// Note [MapSet.Intersect] is more efficient if the sequence is from a map.
+// [MapSet.Intersect] is more efficient if the sequence is from a map.
 //   - time: Θ(k)
 //   - space: Θ(k)
 func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
@@ -157,8 +176,9 @@ func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] 
 }
 
 // Difference returns the key-value pairs which are not present in the keys.
-// Note [MapSet.ReverseDifference] is more efficient if the keys are from a map.
+// [MapSet.ReverseDifference] is more efficient if the keys are from a map.
 // [Difference] is more efficient if the receiver was not originally a map.
+// [MapSet.Remove] is more efficient if the map can be modified.
 //   - time: Ω(k)..O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
@@ -176,7 +196,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 }
 
 // Difference returns the ordered keys which are not present in the sequence(s).
-// Note [MapSet.ReverseDifference] is more efficient if the sequence is from a map.
+// [MapSet.ReverseDifference] is more efficient if the sequence is from a map.
 //   - time: Θ(k)
 //   - space: Θ(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
@@ -194,6 +214,7 @@ func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 }
 
 // SymmetricDifference returns keys which are not in both.
+// [MapSet.Toggle] is more efficient if the map can be modified.
 //   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {

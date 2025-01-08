@@ -3,7 +3,7 @@
 [![go report](https://goreportcard.com/badge/github.com/coady/iterset)](https://goreportcard.com/report/github.com/coady/iterset)
 
 # iterset
-[Golang](https://go.dev) set operations using maps and iterators.
+A [set](https://en.wikipedia.org/wiki/Set_(abstract_data_type)) library based on maps and [iterators](https://pkg.go.dev/iter). A set type is not necessary to have set operations.
 
 There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. In practice this has downsides.
 * Maps must be copied even though they already support iteration and O(1) lookup.
@@ -14,7 +14,7 @@ There are many `mapset` implementations available, but they restrict the values 
 
 Since sets are not built-in, they realistically will always be a secondary type. Even in languages with built-in sets, it is common to call set operations on keys while still keeping data in a map, and common to want to retain ordering.
 
-So `iterset` is built around generic maps with `any` value type. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), its methods also support iterators. This integrates well with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices), and addresses the typical `mapset` issues.
+So `iterset` is built around generic maps with `any` value type. Inspired by [Python sets](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), its methods support iterators. This integrates well with functions in [maps](https://pkg.go.dev/maps) and [slices](https://pkg.go.dev/slices), and addresses the typical `mapset` issues.
 * Maps can be casted instead of copied.
 * Map values are kept without affecting set operations.
 * Slices can be iterated using `slices.Values` without copying.
@@ -59,7 +59,7 @@ Some operations are better expressed as functions, to avoid making unnecessary m
 * `Difference`
 
 ## Installation
-No dependencies. [Go 1.23](https://go.dev/doc/go1.23) required.
+No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.
 
 ```console
 go get github.com/coady/iterset

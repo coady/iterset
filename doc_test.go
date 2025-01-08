@@ -168,6 +168,20 @@ func ExampleMapSet_Delete() {
 	// Output: 1
 }
 
+func ExampleMapSet_Remove() {
+	s := Set("a", "b")
+	s.Remove(slices.Values([]string{"b", "c"}))
+	fmt.Println(s)
+	// Output: map[a:{}]
+}
+
+func ExampleMapSet_Toggle() {
+	s := Set("a", "b")
+	s.Toggle(maps.All(Set("b", "c")))
+	fmt.Println(s)
+	// Output: map[a:{} c:{}]
+}
+
 func ExampleMapSet_Union() {
 	m := map[string]int{"a": 0, "b": 1}
 	n := map[string]int{"b": 2, "c": 3}
