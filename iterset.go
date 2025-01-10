@@ -45,6 +45,19 @@ func (m MapSet[K, V]) missing(key K) bool {
 	return !ok
 }
 
+func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
+	s := Set[K]()
+	for key := range keys {
+		if m.contains(key) {
+			s.Add(key)
+		}
+		if len(m) == len(s) {
+			break
+		}
+	}
+	return s
+}
+
 // Contains returns whether the key is present.
 // For multiple keys, is equivalent to [MapSet.IsSuperset].
 func (m MapSet[K, V]) Contains(keys ...K) bool {
@@ -54,7 +67,7 @@ func (m MapSet[K, V]) Contains(keys ...K) bool {
 // Missing returns whether the key is not present.
 // For multiple keys, is equivalent to [MapSet.IsDisjoint].
 func (m MapSet[K, V]) Missing(keys ...K) bool {
-	return !slices.ContainsFunc(keys, m.contains)
+	return len(m) == 0 || !slices.ContainsFunc(keys, m.contains)
 }
 
 // Equal returns whether the key sets are equivalent. See also [maps.Equal].
@@ -72,11 +85,10 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 // IsSubset returns whether no keys are missing.
 // [MapSet.IsSuperset] is more efficient if the keys are from a map.
 // [IsSubset] is more efficient if the receiver was not originally a map.
-//   - time: Θ(k)
+//   - time: O(k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
-	s := Collect(filterFunc(keys, m.contains), struct{}{})
-	return len(m) == len(s)
+	return len(m) == len(m.intersect(keys))
 }
 
 // IsSubset returns whether all keys are present in the sequence.
@@ -96,7 +108,7 @@ func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 // IsDisjoint returns whether no keys are present.
 //   - time: O(k)
 func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
-	return allFunc(keys, m.missing)
+	return len(m) == 0 || allFunc(keys, m.missing)
 }
 
 // Add key(s) with zero value.
@@ -145,6 +157,9 @@ func (m MapSet[K, V]) Toggle(seq iter.Seq2[K, V]) {
 //   - space: Ω(max(m, k))..O(m+k)
 func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 	m = maps.Clone(m)
+	if m == nil {
+		m = map[K]V{}
+	}
 	for _, seq := range seqs {
 		maps.Insert(m, seq)
 	}
@@ -155,6 +170,9 @@ func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 //   - time: O(k)
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
+		if len(m) == 0 {
+			return
+		}
 		for key := range keys {
 			value, ok := m[key]
 			if ok && !yield(key, value) {
@@ -170,7 +188,11 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - space: Θ(k)
 func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = filterFunc(keys, Collect(seq, struct{}{}).contains)
+		s := Collect(seq, struct{}{})
+		if len(s) == 0 {
+			return maps.Keys(s)
+		}
+		keys = filterFunc(keys, s.contains)
 	}
 	return keys
 }
@@ -179,10 +201,10 @@ func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] 
 // [MapSet.ReverseDifference] is more efficient if the keys are from a map.
 // [Difference] is more efficient if the receiver was not originally a map.
 // [MapSet.Remove] is more efficient if the map can be modified.
-//   - time: Ω(k)..O(m+k)
+//   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
-	s := Collect(filterFunc(keys, m.contains), struct{}{})
+	s := m.intersect(keys)
 	return func(yield func(K, V) bool) {
 		if len(m) == len(s) {
 			return

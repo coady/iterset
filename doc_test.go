@@ -326,3 +326,16 @@ func TestIter(t *testing.T) {
 		}
 	}
 }
+
+func TestEmpty(t *testing.T) {
+	var m MapSet[string, struct{}]
+	if m.Union() == nil {
+		t.Error("should not be nil")
+	}
+	for range m.Intersect(nil) {
+		t.Error("should be empty")
+	}
+	for range Intersect(nil, maps.Keys(m)) {
+		t.Error("should be empty")
+	}
+}
