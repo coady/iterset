@@ -5,7 +5,7 @@
 # iterset
 A [set](https://en.wikipedia.org/wiki/Set_(abstract_data_type)) library based on maps and [iterators](https://pkg.go.dev/iter). A set type is not necessary to have set operations.
 
-There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. In practice this has downsides.
+There are many `mapset` implementations available, but they restrict the values to `struct{}` or `bool`. Although it seems like the right abstract data type, in practice it limits the usability.
 * Maps must be copied even though they already support iteration and O(1) lookup.
 * Map values are lost.
 * Slices must be copied even if they would have only been iterated.

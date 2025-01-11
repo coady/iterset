@@ -58,19 +58,28 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	return s
 }
 
-// Contains returns whether the key is present.
-// For multiple keys, is equivalent to [MapSet.IsSuperset].
+// Contains returns whether the key(s) is present.
+//
+// Related:
+//   - [MapSet.IsSuperset] for many keys
 func (m MapSet[K, V]) Contains(keys ...K) bool {
 	return !slices.ContainsFunc(keys, m.missing)
 }
 
-// Missing returns whether the key is not present.
-// For multiple keys, is equivalent to [MapSet.IsDisjoint].
+// Missing returns whether the key(s) is not present.
+//
+// Related:
+//   - [MapSet.IsDisjoint] for many keys
 func (m MapSet[K, V]) Missing(keys ...K) bool {
 	return len(m) == 0 || !slices.ContainsFunc(keys, m.contains)
 }
 
-// Equal returns whether the key sets are equivalent. See also [maps.Equal].
+// Equal returns whether the key sets are equivalent.
+//
+// Related:
+//   - [maps.Equal] to compare values
+//
+// Performance:
 //   - time: O(k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
@@ -82,9 +91,13 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	return superset && len(m) == len(s)
 }
 
-// IsSubset returns whether no keys are missing.
-// [MapSet.IsSuperset] is more efficient if the keys are from a map.
-// [IsSubset] is more efficient if the receiver was not originally a map.
+// IsSubset returns whether every map key is present in keys.
+//
+// Related:
+//   - [MapSet.IsSuperset] if the keys were a map
+//   - [IsSubset] if the receiver was not a map
+//
+// Performance:
 //   - time: O(k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
@@ -92,7 +105,11 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 }
 
 // IsSubset returns whether all keys are present in the sequence.
-// [MapSet.IsSuperset] is more efficient if the sequence is from a map.
+//
+// Related:
+//   - [MapSet.IsSuperset] if the sequence was a map
+//
+// Performance:
 //   - time: Θ(k)
 //   - space: Θ(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
@@ -100,18 +117,25 @@ func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
 }
 
 // IsSuperset returns whether all keys are present.
+//
+// Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.contains)
 }
 
 // IsDisjoint returns whether no keys are present.
+//
+// Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 	return len(m) == 0 || allFunc(keys, m.missing)
 }
 
 // Add key(s) with zero value.
+//
+// Related:
+//   - [MapSet.Insert] for many keys
 func (m MapSet[K, V]) Add(keys ...K) {
 	var value V
 	for _, key := range keys {
@@ -119,7 +143,11 @@ func (m MapSet[K, V]) Add(keys ...K) {
 	}
 }
 
-// Insert keys with default value. See also [maps.Insert] and [maps.Copy].
+// Insert keys with default value.
+//
+// Related:
+//   - [maps.Insert] for an iter.Seq2
+//   - [maps.Copy] for a map
 func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
 	for key := range keys {
 		m[key] = value
@@ -127,13 +155,19 @@ func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
 }
 
 // Delete key(s).
+//
+// Related:
+//   - [MapSet.Remove] for many keys
 func (m MapSet[K, V]) Delete(keys ...K) {
 	for _, key := range keys {
 		delete(m, key)
 	}
 }
 
-// Remove keys. Equivalent to [MapSet.Difference] in-place.
+// Remove keys.
+//
+// Related:
+//   - [MapSet.Difference] to not modify in-place
 func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
 	for key := range keys {
 		delete(m, key)
@@ -141,7 +175,9 @@ func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
 }
 
 // Toggle removes present keys, and inserts missing keys.
-// Equivalent to [MapSet.SymmetricDifference] in-place.
+//
+// Related:
+//   - [MapSet.SymmetricDifference] to not modify in-place
 func (m MapSet[K, V]) Toggle(seq iter.Seq2[K, V]) {
 	for key, value := range seq {
 		if m.contains(key) {
@@ -153,6 +189,11 @@ func (m MapSet[K, V]) Toggle(seq iter.Seq2[K, V]) {
 }
 
 // Union merges all keys with successive inserts.
+//
+// Related:
+//   - [maps.Insert] to modify in-place
+//
+// Performance:
 //   - time: Θ(m+k)
 //   - space: Ω(max(m, k))..O(m+k)
 func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
@@ -167,6 +208,8 @@ func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 }
 
 // Intersect returns the ordered key-value pairs which are present in both.
+//
+// Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
@@ -183,7 +226,11 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 }
 
 // Intersect returns the ordered keys which are present in the sequence(s).
-// [MapSet.Intersect] is more efficient if the sequence is from a map.
+//
+// Related:
+//   - [MapSet.Intersect] if the sequence was a map
+//
+// Performance:
 //   - time: Θ(k)
 //   - space: Θ(k)
 func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
@@ -198,11 +245,15 @@ func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] 
 }
 
 // Difference returns the key-value pairs which are not present in the keys.
-// [MapSet.ReverseDifference] is more efficient if the keys are from a map.
-// [Difference] is more efficient if the receiver was not originally a map.
-// [MapSet.Remove] is more efficient if the map can be modified.
-//   - time: O(m+k)
-//   - space: O(min(m, k))
+//
+// Related:
+//   - [MapSet.Remove] to modify in-place
+//   - [MapSet.ReverseDifference] if the keys were a map
+//   - [Difference] if the receiver was not a map
+//
+// Performance:
+//   - time:  O(m+k)
+//   - space: O(min(m,k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	s := m.intersect(keys)
 	return func(yield func(K, V) bool) {
@@ -218,7 +269,11 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 }
 
 // Difference returns the ordered keys which are not present in the sequence(s).
-// [MapSet.ReverseDifference] is more efficient if the sequence is from a map.
+//
+// Related:
+//   - [MapSet.ReverseDifference] if the sequence was a map
+//
+// Performance:
 //   - time: Θ(k)
 //   - space: Θ(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
@@ -236,7 +291,11 @@ func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 }
 
 // SymmetricDifference returns keys which are not in both.
-// [MapSet.Toggle] is more efficient if the map can be modified.
+//
+// Related:
+//   - [MapSet.Toggle] to modify in-place
+//
+// Performance:
 //   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
@@ -267,6 +326,12 @@ func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 }
 
 // Unique returns keys in order without duplicates.
+//
+// Related:
+//   - [Index] to return a map
+//   - [Compact] if the keys are already grouped
+//
+// Performance:
 //   - time: O(k)
 //   - space: O(k)
 func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
@@ -278,7 +343,13 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 }
 
 // UniqueBy is like [Unique] but uses a key function to compare values.
-// For values that compare equal, the first key-value pair is returned. See [IndexBy].
+// For values that compare equal, the first key-value pair is returned.
+//
+// Related:
+//   - [IndexBy] to return a map
+//   - [CompactBy] if the values are already grouped by key
+//
+// Performance:
 //   - time: O(k)
 //   - space: O(k)
 func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, V] {
@@ -295,8 +366,10 @@ func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[
 }
 
 // Compact returns consecutive runs of deduplicated keys, with counts.
-// More efficient than [Unique] or [Count] if the keys are already grouped, e.g., sorted.
-//   - time: O(k)
+//
+// Related:
+//   - [Unique] to ignore adjacency
+//   - [Count] to return a map
 func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 	var current K
 	count := 0
@@ -318,8 +391,10 @@ func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 }
 
 // CompactBy is like [Compact] but uses a key function and collects all values.
-// More efficient than [UniqueBy] or [GroupBy] if the values are already grouped, e.g., sorted.
-//   - time: O(k)
+//
+// Related:
+//   - [UniqueBy] to ignore adjacency
+//   - [GroupBy] to return a map
 func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, []V] {
 	var current K
 	var group []V
@@ -341,7 +416,10 @@ func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2
 	}
 }
 
-// Collect returns unique keys with a default value. See also [maps.Collect].
+// Collect returns unique keys with a default value.
+//
+// Related:
+//   - [maps.Collect] for an iter.Seq2
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 	m := MapSet[K, V]{}
 	m.Insert(keys, value)
@@ -354,6 +432,10 @@ func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 }
 
 // Index returns unique keys with their first index position.
+//
+// Related:
+//   - [Unique] to return an ordered sequence
+//   - [Sorted] to restore original order
 func Index[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 	m := MapSet[K, int]{}
 	i := 0
@@ -367,6 +449,9 @@ func Index[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 }
 
 // Count returns unique keys with their counts.
+//
+// Related:
+//   - [Compact] if the keys are already grouped
 func Count[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 	m := map[K]int{}
 	for key := range keys {
@@ -376,7 +461,11 @@ func Count[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 }
 
 // IndexBy returns values indexed by key function.
-// If there are collisions, the last value remains. See [GroupBy].
+// If there are collisions, the last value remains.
+//
+// Related:
+//   - [UniqueBy] to return an ordered sequence
+//   - [GroupBy] to retain all values
 func IndexBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, V] {
 	m := map[K]V{}
 	for value := range values {
@@ -385,7 +474,11 @@ func IndexBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, V
 	return m
 }
 
-// GroupBy returns values grouped by key function. See [IndexBy].
+// GroupBy returns values grouped by key function.
+//
+// Related:
+//   - [IndexBy] to retain single value
+//   - [CompactBy] if the values are already grouped by key
 func GroupBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, []V] {
 	m := map[K][]V{}
 	for value := range values {
