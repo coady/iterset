@@ -45,13 +45,6 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `ReverseDifference`
 * `SymmetricDifference`
 
-Scalar operations can be passed as bound methods for functional programming. 
-* `Get`
-* `Contains`
-* `Missing`
-* `Add`
-* `Delete`
-
 Some operations are better expressed as functions, to avoid making unnecessary maps.
 * `Sorted`
 * `IsSubset`

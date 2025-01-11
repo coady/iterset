@@ -105,21 +105,9 @@ func Example_unique() {
 	// [a b]
 }
 
-func ExampleMapSet_Get() {
-	m := Cast(map[string]int{"a": 1})
-	fmt.Println(m.Get("a"))
-	// Output: 1
-}
-
 func ExampleMapSet_Contains() {
 	s := Set("b", "a", "b")
 	fmt.Println(s.Contains("a"), s.Contains("b", "c"))
-	// Output: true false
-}
-
-func ExampleMapSet_Missing() {
-	s := Set("b", "a", "b")
-	fmt.Println(s.Missing("c"), s.Missing("b", "c"))
 	// Output: true false
 }
 

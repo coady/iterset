@@ -30,11 +30,6 @@ func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
 // MapSet is a `map` extended with set methods.
 type MapSet[K comparable, V any] map[K]V
 
-// Get returns the key's value. A convenience method that can be passed as an argument.
-func (m MapSet[K, V]) Get(key K) V {
-	return m[key]
-}
-
 func (m MapSet[K, V]) contains(key K) bool {
 	_, ok := m[key]
 	return ok
@@ -64,14 +59,6 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 //   - [MapSet.IsSuperset] for many keys
 func (m MapSet[K, V]) Contains(keys ...K) bool {
 	return !slices.ContainsFunc(keys, m.missing)
-}
-
-// Missing returns whether the key(s) is not present.
-//
-// Related:
-//   - [MapSet.IsDisjoint] for many keys
-func (m MapSet[K, V]) Missing(keys ...K) bool {
-	return len(m) == 0 || !slices.ContainsFunc(keys, m.contains)
 }
 
 // Equal returns whether the key sets are equivalent.
