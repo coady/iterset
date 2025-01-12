@@ -279,6 +279,18 @@ func ExampleSorted() {
 	// Output: [b a]
 }
 
+func ExampleMin() {
+	s := Min(map[string]int{"a": 2, "b": 1, "c": 1})
+	slices.Sort(s)
+	fmt.Println(s)
+	// Output: [b c]
+}
+
+func ExampleMax() {
+	fmt.Println(Max(map[string]int{"a": 2, "b": 1, "c": 0}))
+	// Output: [a]
+}
+
 func TestIter(t *testing.T) {
 	k := slices.Values([]string{"a", "A"})
 	for range UniqueBy(k, strings.TrimSpace) {

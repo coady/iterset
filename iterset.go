@@ -486,9 +486,47 @@ func Memoize[K comparable, V any](keys iter.Seq[K], f func(K) V) MapSet[K, V] {
 	return m
 }
 
-// Sorted returns keys sorted by values.
-// When used with [Index], this will retain the original key order.
+// Sorted returns keys ordered by corresponding value.
+//
+// Related:
+//   - [Index] to retain original order
+//   - [Count] to rank by frequency
 func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
 	compare := func(a, b K) int { return cmp.Compare(m[a], m[b]) }
 	return slices.SortedFunc(maps.Keys(m), compare)
+}
+
+func ranked[K comparable, V cmp.Ordered](m map[K]V, target int) []K {
+	keys := []K{}
+	var current V
+	for key, value := range m {
+		if len(keys) == 0 {
+			current = value
+		}
+		switch cmp.Compare(value, current) {
+		case target:
+			keys, current = []K{key}, value
+		case 0:
+			keys = append(keys, key)
+		}
+	}
+	return keys
+}
+
+// Min returns keys with the minimum corresponding value.
+// Will be empty only if the map is empty.
+//
+// Related:
+//   - [Count] to rank by frequency
+func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
+	return ranked(m, -1)
+}
+
+// Max returns keys with the maximum corresponding value.
+// Will be empty only if the map is empty.
+//
+// Related:
+//   - [Count] to rank by frequency
+func Max[K comparable, V cmp.Ordered](m map[K]V) []K {
+	return ranked(m, 1)
 }

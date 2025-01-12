@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 * `UniqueBy`
 * `Compact` and `CompactBy`
 * `Remove` and `Toggle`
+* `Min` and `Max`
 
 ### Removed
 * `Get` 
