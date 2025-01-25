@@ -265,7 +265,10 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - space: Θ(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = filterFunc(keys, Collect(seq, struct{}{}).missing)
+		s := Collect(seq, struct{}{})
+		if len(s) > 0 {
+			keys = filterFunc(keys, s.missing)
+		}
 	}
 	return keys
 }
@@ -274,6 +277,9 @@ func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K]
 // Also known as the relative complement.
 //   - time: O(k)
 func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
+	if len(m) == 0 {
+		return keys
+	}
 	return filterFunc(keys, m.missing)
 }
 
@@ -286,6 +292,9 @@ func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 //   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
+	if len(m) == 0 {
+		return keys
+	}
 	s := Set[K]()
 	return func(yield func(K) bool) {
 		for key := range keys {
@@ -496,37 +505,38 @@ func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
 	return slices.SortedFunc(maps.Keys(m), compare)
 }
 
-func ranked[K comparable, V cmp.Ordered](m map[K]V, target int) []K {
+// Min returns the key(s) with the minimum corresponding value.
+// Will be empty only if the map is empty.
+//
+// Related:
+//   - [Count] to rank by frequency
+func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
 	keys := []K{}
 	var current V
 	for key, value := range m {
-		if len(keys) == 0 {
-			current = value
-		}
-		switch cmp.Compare(value, current) {
-		case target:
+		if len(keys) == 0 || value < current {
 			keys, current = []K{key}, value
-		case 0:
+		} else if value == current {
 			keys = append(keys, key)
 		}
 	}
 	return keys
 }
 
-// Min returns keys with the minimum corresponding value.
-// Will be empty only if the map is empty.
-//
-// Related:
-//   - [Count] to rank by frequency
-func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
-	return ranked(m, -1)
-}
-
-// Max returns keys with the maximum corresponding value.
+// Max returns the key(s) with the maximum corresponding value.
 // Will be empty only if the map is empty.
 //
 // Related:
 //   - [Count] to rank by frequency
 func Max[K comparable, V cmp.Ordered](m map[K]V) []K {
-	return ranked(m, 1)
+	keys := []K{}
+	var current V
+	for key, value := range m {
+		if len(keys) == 0 || value > current {
+			keys, current = []K{key}, value
+		} else if value == current {
+			keys = append(keys, key)
+		}
+	}
+	return keys
 }

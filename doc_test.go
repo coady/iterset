@@ -287,8 +287,10 @@ func ExampleMin() {
 }
 
 func ExampleMax() {
-	fmt.Println(Max(map[string]int{"a": 2, "b": 1, "c": 0}))
-	// Output: [a]
+	s := Max(map[string]int{"a": 2, "b": 2, "c": 1})
+	slices.Sort(s)
+	fmt.Println(s)
+	// Output: [a b]
 }
 
 func TestIter(t *testing.T) {
@@ -336,6 +338,13 @@ func TestEmpty(t *testing.T) {
 		t.Error("should be empty")
 	}
 	for range Intersect(nil, maps.Keys(m)) {
+		t.Error("should be empty")
+	}
+	m.Toggle(maps.All(m))
+	for range m.ReverseDifference(maps.Keys(m)) {
+		t.Error("should be empty")
+	}
+	for range m.SymmetricDifference(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
 }
