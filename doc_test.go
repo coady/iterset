@@ -149,6 +149,13 @@ func ExampleMapSet_Add() {
 	// Output: 3
 }
 
+func ExampleMapSet_Insert() {
+	m := MapSet[string, bool]{}
+	m.Insert(slices.Values([]string{"b", "a", "b"}), true)
+	fmt.Println(m)
+	// Output: map[a:true b:true]
+}
+
 func ExampleMapSet_Delete() {
 	s := Set("a", "b")
 	s.Delete("b", "c")
@@ -177,6 +184,15 @@ func ExampleMapSet_Union() {
 	// Output: map[a:0 b:2 c:3]
 }
 
+func ExampleMapSet_Intersect() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	s := slices.Values([]string{"b", "c"})
+	for key, value := range m.Intersect(s) {
+		fmt.Println(key, value)
+	}
+	// Output: b 1
+}
+
 func ExampleIntersect() {
 	s1 := slices.Values([]string{"a", "b"})
 	s2 := slices.Values([]string{"b", "c"})
@@ -197,10 +213,23 @@ func ExampleDifference() {
 	// Output: [a]
 }
 
+func ExampleMapSet_ReverseDifference() {
+	k := slices.Values([]string{"b", "c"})
+	fmt.Println(slices.Collect(Set("a", "b").ReverseDifference(k)))
+	// Output: [c]
+}
+
 func ExampleMapSet_SymmetricDifference() {
 	k := slices.Values([]string{"b", "c"})
 	fmt.Println(slices.Collect(Set("a", "b").SymmetricDifference(k)))
 	// Output: [c a]
+}
+
+func ExampleCast() {
+	m := map[string]bool{}
+	Cast(m).Add("a")
+	fmt.Println(m)
+	// Output: map[a:false]
 }
 
 func ExampleUnique() {
@@ -245,6 +274,11 @@ func ExampleCollect() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Collect(k, true))
 	// Output: map[a:true b:true]
+}
+
+func ExampleSet() {
+	fmt.Println(Set("b", "a", "b"))
+	// Output: map[a:{} b:{}]
 }
 
 func ExampleIndex() {
