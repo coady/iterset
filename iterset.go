@@ -265,10 +265,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - space: Θ(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		s := Collect(seq, struct{}{})
-		if len(s) > 0 {
-			keys = filterFunc(keys, s.missing)
-		}
+		keys = Collect(seq, struct{}{}).ReverseDifference(keys)
 	}
 	return keys
 }
@@ -413,6 +410,7 @@ func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2
 }
 
 // Collect returns unique keys with a default value.
+// Equivalent to [Set] when value is `struct{}{}`.
 //
 // Related:
 //   - [maps.Collect] for an iter.Seq2
@@ -423,6 +421,9 @@ func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 }
 
 // Set returns unique keys with an empty struct value.
+//
+// Related:
+//   - [Collect] for an iter.Seq
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 	return Collect(slices.Values(keys), struct{}{})
 }
