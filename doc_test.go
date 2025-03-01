@@ -125,7 +125,7 @@ func ExampleEqual() {
 
 func ExampleEqualCounts() {
 	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(EqualCounts(k, k), EqualCounts(slices.Values([]string{"a", "b"}), k))
+	fmt.Println(EqualCounts(k, k), EqualCounts(k, slices.Values([]string{"a", "b"})))
 	// Output: true false
 }
 
@@ -337,6 +337,18 @@ func ExampleMax() {
 	slices.Sort(s)
 	fmt.Println(s)
 	// Output: [a b]
+}
+
+func ExampleSize() {
+	s := slices.Values([]int{0, 0, 0})
+	fmt.Println(Size(s))
+	// Output: 3
+}
+
+func ExampleSize2() {
+	s := slices.All([]int{0, 0, 0})
+	fmt.Println(Size2(s))
+	// Output: 3
 }
 
 func TestIter(t *testing.T) {

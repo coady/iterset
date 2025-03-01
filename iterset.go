@@ -576,3 +576,21 @@ func Max[K comparable, V cmp.Ordered](m map[K]V) []K {
 	}
 	return keys
 }
+
+// Size returns the number of values in a sequence.
+func Size[V any](seq iter.Seq[V]) int {
+	count := 0
+	for range seq {
+		count += 1
+	}
+	return count
+}
+
+// Size2 returns the number of pairs in a sequence.
+func Size2[K, V any](seq iter.Seq2[K, V]) int {
+	count := 0
+	for range seq {
+		count += 1
+	}
+	return count
+}
