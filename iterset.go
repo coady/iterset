@@ -78,6 +78,39 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	return superset && len(m) == len(s)
 }
 
+// Equal returns whether the sets of keys are equal.
+//
+// Related:
+//   - [MapSet.Equal] if either sequence was a map
+//
+// Performance:
+//   - time: Θ(k)
+//   - space: Θ(k)
+func Equal[K comparable](keys, seq iter.Seq[K]) bool {
+	return Collect(seq, struct{}{}).Equal(keys)
+}
+
+// EqualCounts returns whether the multisets of keys are equal.
+//
+// Related:
+//   - [Equal] to ignore counts
+//
+// Performance:
+//   - time: Θ(k)
+//   - space: Θ(k)
+func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
+	m := Count(seq)
+	for key := range keys {
+		m[key] -= 1
+		if m[key] == 0 {
+			delete(m, key)
+		} else if m[key] < 0 {
+			return false
+		}
+	}
+	return len(m) == 0
+}
+
 // IsSubset returns whether every map key is present in keys.
 //
 // Related:
@@ -272,6 +305,8 @@ func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K]
 
 // ReverseDifference returns the ordered keys which are not present in the map.
 // Also known as the relative complement.
+//
+// Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 	if len(m) == 0 {

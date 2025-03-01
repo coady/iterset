@@ -117,6 +117,18 @@ func ExampleMapSet_Equal() {
 	// Output: true false
 }
 
+func ExampleEqual() {
+	k := slices.Values([]string{"b", "a", "b"})
+	fmt.Println(Equal(slices.Values([]string{"a", "b"}), k))
+	// Output: true
+}
+
+func ExampleEqualCounts() {
+	k := slices.Values([]string{"b", "a", "b"})
+	fmt.Println(EqualCounts(k, k), EqualCounts(slices.Values([]string{"a", "b"}), k))
+	// Output: true false
+}
+
 func ExampleMapSet_IsSubset() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Set("a").IsSubset(k), Set("a", "c").IsSubset(k))
