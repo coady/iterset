@@ -40,11 +40,16 @@ func (m MapSet[K, V]) missing(key K) bool {
 	return !ok
 }
 
+func (m MapSet[K, V]) add(key K) {
+	var value V
+	m[key] = value
+}
+
 func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	s := Set[K]()
 	for key := range keys {
 		if m.contains(key) {
-			s.Add(key)
+			s.add(key)
 		}
 		if len(m) == len(s) {
 			break
@@ -72,7 +77,7 @@ func (m MapSet[K, V]) Contains(keys ...K) bool {
 func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	s := Set[K]()
 	superset := allFunc(keys, func(key K) bool {
-		s.Add(key)
+		s.add(key)
 		return m.contains(key)
 	})
 	return superset && len(m) == len(s)
@@ -90,7 +95,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 	m := Collect(keys, true)
 	superset := allFunc(seq, func(key K) bool {
-		defer m.Add(key)
+		defer m.add(key)
 		return m.contains(key)
 	})
 	return superset && allFunc(maps.Values(m), func(v bool) bool { return !v })
@@ -143,12 +148,7 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 //   - space: Θ(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
 	s := Collect(keys, struct{}{})
-	for key := range seq {
-		delete(s, key)
-		if len(s) == 0 {
-			break
-		}
-	}
+	s.Remove(seq)
 	return len(s) == 0
 }
 
@@ -207,6 +207,9 @@ func (m MapSet[K, V]) Delete(keys ...K) {
 func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
 	for key := range keys {
 		delete(m, key)
+		if len(m) == 0 {
+			return
+		}
 	}
 }
 
@@ -347,7 +350,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		for key := range keys {
 			if m.contains(key) {
-				s.Add(key)
+				s.add(key)
 			} else if !yield(key) {
 				return
 			}
@@ -381,7 +384,7 @@ func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	s := Set[K]()
 	return filterFunc(keys, func(key K) bool {
-		defer s.Add(key)
+		defer s.add(key)
 		return s.missing(key)
 	})
 }
@@ -404,7 +407,7 @@ func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[
 			if s.missing(k) && !yield(k, value) {
 				return
 			}
-			s.Add(k)
+			s.add(k)
 		}
 	}
 }
