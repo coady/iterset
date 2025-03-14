@@ -27,6 +27,30 @@ func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
 	return true
 }
 
+func compare[K comparable](keys, seq iter.Seq[K]) int {
+	m := MapSet[K, int]{}
+	next, stop := iter.Pull(seq)
+	defer stop()
+	for key := range keys {
+		for m.missing(key) {
+			k, ok := next()
+			if !ok {
+				return 1
+			}
+			m[k] += 1
+		}
+		m[key] -= 1
+		if m[key] == 0 {
+			delete(m, key)
+		}
+	}
+	_, ok := next()
+	if ok || len(m) > 0 {
+		return -1
+	}
+	return 0
+}
+
 // MapSet is a `map` extended with set methods.
 type MapSet[K comparable, V any] map[K]V
 
@@ -84,44 +108,28 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 }
 
 // Equal returns whether the sets of keys are equal.
-// Optimized for keys not being larger than the sequence.
 //
 // Related:
 //   - [MapSet.Equal] if either sequence was a map
 //
 // Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
+//   - time: O(k)
+//   - space: O(k)
 func Equal[K comparable](keys, seq iter.Seq[K]) bool {
-	m := Collect(keys, true)
-	superset := allFunc(seq, func(key K) bool {
-		defer m.add(key)
-		return m.contains(key)
-	})
-	return superset && allFunc(maps.Values(m), func(v bool) bool { return !v })
+	return compare(Unique(keys), Unique(seq)) == 0
 }
 
 // EqualCounts returns whether the multisets of keys are equal.
-// Optimized for keys not being larger than the sequence.
 //
 // Related:
 //   - [Equal] to ignore counts
 //   - [Count] and [maps.Equal] if either sequence were counts
 //
 // Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
+//   - time: O(k)
+//   - space: O(k)
 func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
-	m := Count(keys)
-	for key := range seq {
-		m[key] -= 1
-		if m[key] == 0 {
-			delete(m, key)
-		} else if m[key] < 0 {
-			return false
-		}
-	}
-	return len(m) == 0
+	return compare(keys, seq) == 0
 }
 
 // IsSubset returns whether every map key is present in keys.
@@ -138,18 +146,15 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 }
 
 // IsSubset returns whether all keys are present in the sequence.
-// Optimized for keys not being larger than the sequence.
 //
 // Related:
 //   - [MapSet.IsSuperset] if the sequence was a map
 //
 // Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
+//   - time: O(k)
+//   - space: O(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
-	s := Collect(keys, struct{}{})
-	s.Remove(seq)
-	return len(s) == 0
+	return compare(Unique(keys), seq) <= 0
 }
 
 // IsSuperset returns whether all keys are present.

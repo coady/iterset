@@ -407,4 +407,5 @@ func TestEmpty(t *testing.T) {
 	for range m.SymmetricDifference(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
+	m.Remove(slices.Values([]string{""}))
 }
