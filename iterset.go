@@ -610,11 +610,16 @@ func Size[V any](seq iter.Seq[V]) int {
 	return count
 }
 
-// Size2 returns the number of pairs in a sequence.
-func Size2[K, V any](seq iter.Seq2[K, V]) int {
-	count := 0
-	for range seq {
-		count += 1
+// Keys returns the keys from a sequence of pairs.
+//
+// Related:
+//   - [maps.Keys] for a map
+func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		for key := range seq {
+			if !yield(key) {
+				return
+			}
+		}
 	}
-	return count
 }

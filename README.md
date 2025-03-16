@@ -47,6 +47,7 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 
 Some operations are better expressed as functions, to avoid making unnecessary maps.
 * `Sorted`
+* `Equal`
 * `IsSubset`
 * `Intersect`
 * `Difference`

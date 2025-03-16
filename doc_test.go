@@ -347,10 +347,10 @@ func ExampleSize() {
 	// Output: 3
 }
 
-func ExampleSize2() {
-	s := slices.All([]int{0, 0, 0})
-	fmt.Println(Size2(s))
-	// Output: 3
+func ExampleKeys() {
+	s := slices.All([]string{"a", "b", "c"})
+	fmt.Println(slices.Collect(Keys(s)))
+	// Output: [0 1 2]
 }
 
 func TestIter(t *testing.T) {
@@ -386,6 +386,9 @@ func TestIter(t *testing.T) {
 		if c == "b" {
 			break
 		}
+	}
+	for range Keys(slices.All([]string{""})) {
+		break
 	}
 }
 
