@@ -20,6 +20,13 @@ func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	return s, slices.Values(k)
 }
 
+func BenchmarkEqual(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		s.Equal(k)
+	}
+}
+
 func BenchmarkIsSubset(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {

@@ -202,6 +202,9 @@ func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
 func (m MapSet[K, V]) Delete(keys ...K) {
 	for _, key := range keys {
 		delete(m, key)
+		if len(m) == 0 {
+			return
+		}
 	}
 }
 
@@ -222,8 +225,8 @@ func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
 //
 // Related:
 //   - [MapSet.SymmetricDifference] to not modify in-place
-func (m MapSet[K, V]) Toggle(seq iter.Seq2[K, V]) {
-	for key, value := range seq {
+func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
+	for key := range keys {
 		if m.contains(key) {
 			delete(m, key)
 		} else {
@@ -256,10 +259,10 @@ func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
+	if len(m) == 0 {
+		return maps.All(m)
+	}
 	return func(yield func(K, V) bool) {
-		if len(m) == 0 {
-			return
-		}
 		for key := range keys {
 			value, ok := m[key]
 			if ok && !yield(key, value) {
@@ -300,10 +303,10 @@ func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] 
 //   - space: O(min(m,k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	s := m.intersect(keys)
+	if len(m) == len(s) {
+		return func(func(K, V) bool) {}
+	}
 	return func(yield func(K, V) bool) {
-		if len(m) == len(s) {
-			return
-		}
 		for key, value := range m {
 			if s.missing(key) && !yield(key, value) {
 				return

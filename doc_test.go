@@ -186,7 +186,7 @@ func ExampleMapSet_Remove() {
 
 func ExampleMapSet_Toggle() {
 	s := Set("a", "b")
-	s.Toggle(maps.All(Set("b", "c")))
+	s.Toggle(maps.Keys(Set("b", "c")), struct{}{})
 	fmt.Println(s)
 	// Output: map[a:{} c:{}]
 }
@@ -403,12 +403,12 @@ func TestEmpty(t *testing.T) {
 	for range Intersect(nil, maps.Keys(m)) {
 		t.Error("should be empty")
 	}
-	m.Toggle(maps.All(m))
 	for range m.ReverseDifference(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
 	for range m.SymmetricDifference(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
+	m.Delete("")
 	m.Remove(slices.Values([]string{""}))
 }
