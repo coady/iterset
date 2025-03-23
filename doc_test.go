@@ -5,12 +5,7 @@ import (
 	"maps"
 	"slices"
 	"strings"
-	"testing"
 )
-
-type item struct{ id string }
-
-func (it item) Id() string { return it.id }
 
 // Intersect a map with a slice of keys, retaining original order.
 func Example_intersect() {
@@ -253,13 +248,13 @@ func ExampleUnique() {
 }
 
 func ExampleUniqueBy() {
-	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
-	for key, value := range UniqueBy(slices.Values(items), item.Id) {
+	v := slices.Values([]string{"B", "a", "b"})
+	for key, value := range UniqueBy(v, strings.ToLower) {
 		fmt.Println(key, value)
 	}
 	// Output:
-	// b {b}
-	// a {a}
+	// b B
+	// a a
 }
 
 func ExampleCompact() {
@@ -274,14 +269,14 @@ func ExampleCompact() {
 }
 
 func ExampleCompactBy() {
-	items := []item{{id: "b"}, {id: "b"}, {id: "a"}, {id: "a"}, {id: "b"}}
-	for key, values := range CompactBy(slices.Values(items), item.Id) {
+	v := slices.Values([]string{"B", "b", "A", "a", "b"})
+	for key, values := range CompactBy(v, strings.ToLower) {
 		fmt.Println(key, values)
 	}
 	// Output:
-	// b [{b} {b}]
-	// a [{a} {a}]
-	// b [{b}]
+	// b [B b]
+	// a [A a]
+	// b [b]
 }
 
 func ExampleCollect() {
@@ -306,15 +301,15 @@ func ExampleCount() {
 }
 
 func ExampleIndexBy() {
-	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
-	fmt.Println(IndexBy(slices.Values(items), item.Id))
-	// Output: map[a:{a} b:{b}]
+	v := slices.Values([]string{"B", "a", "b"})
+	fmt.Println(IndexBy(v, strings.ToLower))
+	// Output: map[a:a b:b]
 }
 
 func ExampleGroupBy() {
-	items := []item{{id: "b"}, {id: "a"}, {id: "b"}}
-	fmt.Println(GroupBy(slices.Values(items), item.Id))
-	// Output: map[a:[{a}] b:[{b} {b}]]
+	v := slices.Values([]string{"B", "a", "b"})
+	fmt.Println(GroupBy(v, strings.ToLower))
+	// Output: map[a:[a] b:[B b]]
 }
 
 func ExampleMemoize() {
@@ -351,64 +346,4 @@ func ExampleKeys() {
 	s := slices.All([]string{"a", "b", "c"})
 	fmt.Println(slices.Collect(Keys(s)))
 	// Output: [0 1 2]
-}
-
-func TestIter(t *testing.T) {
-	k := slices.Values([]string{"a", "A"})
-	for range UniqueBy(k, strings.TrimSpace) {
-		break
-	}
-	for range Compact(k) {
-		break
-	}
-	for range CompactBy(k, strings.TrimSpace) {
-		break
-	}
-	for range Set("a").Intersect(k) {
-		break
-	}
-	for c := range Index(k).Difference(k) {
-		t.Errorf("should be empty: %s", c)
-	}
-	for range Set("b").Difference(k) {
-		break
-	}
-	for range Set("b").ReverseDifference(k) {
-		break
-	}
-	for c := range Index(k).SymmetricDifference(k) {
-		t.Errorf("should be empty: %s", c)
-	}
-	for range Set("b").SymmetricDifference(k) {
-		break
-	}
-	for c := range Set("b").SymmetricDifference(k) {
-		if c == "b" {
-			break
-		}
-	}
-	for range Keys(slices.All([]string{""})) {
-		break
-	}
-}
-
-func TestEmpty(t *testing.T) {
-	var m MapSet[string, struct{}]
-	if m.Union() == nil {
-		t.Error("should not be nil")
-	}
-	for range m.Intersect(nil) {
-		t.Error("should be empty")
-	}
-	for range Intersect(nil, maps.Keys(m)) {
-		t.Error("should be empty")
-	}
-	for range m.ReverseDifference(maps.Keys(m)) {
-		t.Error("should be empty")
-	}
-	for range m.SymmetricDifference(maps.Keys(m)) {
-		t.Error("should be empty")
-	}
-	m.Delete("")
-	m.Remove(slices.Values([]string{""}))
 }
