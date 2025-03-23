@@ -390,11 +390,15 @@ func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 //   - time: O(k)
 //   - space: O(k)
 func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
-	s := Set[K]()
-	return filterFunc(keys, func(key K) bool {
-		defer s.add(key)
-		return s.missing(key)
-	})
+	return func(yield func(K) bool) {
+		s := Set[K]()
+		for key := range keys {
+			if s.missing(key) && !yield(key) {
+				return
+			}
+			s.add(key)
+		}
+	}
 }
 
 // UniqueBy is like [Unique] but uses a key function to compare values.
@@ -408,8 +412,8 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 //   - time: O(k)
 //   - space: O(k)
 func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, V] {
-	s := Set[K]()
 	return func(yield func(K, V) bool) {
+		s := Set[K]()
 		for value := range values {
 			k := key(value)
 			if s.missing(k) && !yield(k, value) {
@@ -426,9 +430,9 @@ func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[
 //   - [Unique] to ignore adjacency
 //   - [Count] to return a map
 func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
-	var current K
-	count := 0
 	return func(yield func(K, int) bool) {
+		var current K
+		count := 0
 		for key := range keys {
 			if count > 0 && key != current {
 				if !yield(current, count) {
@@ -451,9 +455,9 @@ func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 //   - [UniqueBy] to ignore adjacency
 //   - [GroupBy] to return a map
 func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, []V] {
-	var current K
-	var group []V
 	return func(yield func(K, []V) bool) {
+		var current K
+		var group []V
 		for value := range values {
 			k := key(value)
 			if group != nil && k != current {

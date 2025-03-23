@@ -1,6 +1,7 @@
 package iterset
 
 import (
+	"iter"
 	"maps"
 	"slices"
 	"strings"
@@ -25,6 +26,9 @@ func TestBreak(t *testing.T) {
 		t.Errorf("should be empty: %s", c)
 	}
 	for range Set("b").Difference(k) {
+		break
+	}
+	for range Set("b").ReverseDifference(k) {
 		break
 	}
 	for c := range Index(k).SymmetricDifference(k) {
@@ -62,4 +66,21 @@ func TestEmpty(t *testing.T) {
 	}
 	m.Delete("")
 	m.Remove(slices.Values([]string{""}))
+}
+
+func assertMulti[K any](t *testing.T, seq iter.Seq[K]) {
+	count := Size(seq)
+	if Size(seq) != count {
+		t.Error("should not be single-use")
+	}
+}
+
+func TestMulti(t *testing.T) {
+	k := slices.Values([]string{"a", "A", "b"})
+	assertMulti(t, Unique(k))
+	assertMulti(t, Keys(UniqueBy(k, strings.ToLower)))
+	assertMulti(t, Keys(Compact(k)))
+	assertMulti(t, Keys(CompactBy(k, strings.ToLower)))
+	assertMulti(t, Keys(Set("b").Difference(k)))
+	assertMulti(t, Set("b").SymmetricDifference(k))
 }
