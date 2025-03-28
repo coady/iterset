@@ -22,6 +22,9 @@ func TestBreak(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
+	for range Intersect(k, k) {
+		break
+	}
 	for c := range Index(k).Difference(k) {
 		t.Errorf("should be empty: %s", c)
 	}
@@ -55,7 +58,7 @@ func TestEmpty(t *testing.T) {
 	for range m.Intersect(nil) {
 		t.Error("should be empty")
 	}
-	for range Intersect(nil, maps.Keys(m)) {
+	for range Intersect(maps.Keys(m), maps.Keys(m)) {
 		t.Error("should be empty")
 	}
 	for range m.ReverseDifference(maps.Keys(m)) {

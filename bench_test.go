@@ -2,6 +2,7 @@ package iterset
 
 import (
 	"iter"
+	"maps"
 	"math/rand"
 	"slices"
 	"testing"
@@ -10,7 +11,7 @@ import (
 func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	defer b.ResetTimer()
 	s := Set[int]()
-	for range b.N * 2 {
+	for range b.N / 4 {
 		s.Add(rand.Intn(b.N))
 	}
 	k := make([]int, b.N/2)
@@ -20,28 +21,42 @@ func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	return s, slices.Values(k)
 }
 
-func BenchmarkEqual(b *testing.B) {
+func BenchmarkMapSet_Equal(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		s.Equal(k)
 	}
 }
 
-func BenchmarkIsSubset(b *testing.B) {
+func BenchmarkEqual(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		Equal(maps.Keys(s), k)
+	}
+}
+
+func BenchmarkMapSet_IsSubset(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		s.IsSubset(k)
 	}
 }
 
-func BenchmarkIsSuperset(b *testing.B) {
+func BenchmarkIsSubset(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		IsSubset(maps.Keys(s), k)
+	}
+}
+
+func BenchmarkMapSet_IsSuperset(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		s.IsSuperset(k)
 	}
 }
 
-func BenchmarkIntersect(b *testing.B) {
+func BenchmarkMapSet_Intersect(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		for range s.Intersect(k) {
@@ -49,7 +64,15 @@ func BenchmarkIntersect(b *testing.B) {
 	}
 }
 
-func BenchmarkDifference(b *testing.B) {
+func BenchmarkIntersect(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		for range Intersect(maps.Keys(s), k) {
+		}
+	}
+}
+
+func BenchmarkMapSet_Difference(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		for range s.Difference(k) {
@@ -57,7 +80,15 @@ func BenchmarkDifference(b *testing.B) {
 	}
 }
 
-func BenchmarkReverseDifference(b *testing.B) {
+func BenchmarkDifference(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		for range Difference(maps.Keys(s), k) {
+		}
+	}
+}
+
+func BenchmarkMapSet_ReverseDifference(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		for range s.ReverseDifference(k) {
@@ -65,7 +96,7 @@ func BenchmarkReverseDifference(b *testing.B) {
 	}
 }
 
-func BenchmarkSymmetricDifference(b *testing.B) {
+func BenchmarkMapSet_SymmetricDifference(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		for range s.SymmetricDifference(k) {

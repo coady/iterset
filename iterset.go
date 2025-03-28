@@ -51,6 +51,26 @@ func compare[K comparable](keys, seq iter.Seq[K]) int {
 	return 0
 }
 
+func filterIn[K comparable](keys, seq iter.Seq[K], contains bool) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		s := Set[K]()
+		next, stop := iter.Pull(seq)
+		defer stop()
+		for key := range keys {
+			for s.missing(key) {
+				k, ok := next()
+				if !ok {
+					break
+				}
+				s.add(k)
+			}
+			if s.contains(key) == contains && !yield(key) {
+				return
+			}
+		}
+	}
+}
+
 // MapSet is a `map` extended with set methods.
 type MapSet[K comparable, V any] map[K]V
 
@@ -278,15 +298,11 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - [MapSet.Intersect] if the sequence was a map
 //
 // Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
+//   - time: O(k)
+//   - space: O(k)
 func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		s := Collect(seq, struct{}{})
-		if len(s) == 0 {
-			return maps.Keys(s)
-		}
-		keys = filterFunc(keys, s.contains)
+		keys = filterIn(keys, seq, true)
 	}
 	return keys
 }
@@ -321,11 +337,11 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - [MapSet.ReverseDifference] if the sequence was a map
 //
 // Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
+//   - time: O(k)
+//   - space: O(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = Collect(seq, struct{}{}).ReverseDifference(keys)
+		keys = filterIn(keys, seq, false)
 	}
 	return keys
 }
