@@ -8,15 +8,17 @@ import (
 	"testing"
 )
 
+const size = 100_000
+
 func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	defer b.ResetTimer()
 	s := Set[int]()
-	for range b.N / 4 {
-		s.Add(rand.Intn(b.N))
+	for range size / 4 {
+		s.Add(rand.Intn(size))
 	}
-	k := make([]int, b.N/2)
+	k := make([]int, size/2)
 	for i := range k {
-		k[i] = rand.Intn(b.N)
+		k[i] = rand.Intn(size)
 	}
 	return s, slices.Values(k)
 }
@@ -119,5 +121,14 @@ func BenchmarkCompact(b *testing.B) {
 	for range b.N {
 		for range Compact(s) {
 		}
+	}
+}
+
+func BenchmarkSet(b *testing.B) {
+	_, k := setup(b)
+	s := slices.Collect(k)
+	b.ResetTimer()
+	for range b.N {
+		Set(s...)
 	}
 }

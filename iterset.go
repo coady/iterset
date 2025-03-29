@@ -507,7 +507,9 @@ func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 // Related:
 //   - [Collect] for an iter.Seq
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
-	return Collect(slices.Values(keys), struct{}{})
+	s := make(MapSet[K, struct{}], len(keys))
+	s.Add(keys...)
+	return s
 }
 
 // Index returns unique keys with their first index position.
