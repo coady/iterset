@@ -52,7 +52,7 @@ func compare[K comparable](keys, seq iter.Seq[K]) int {
 	return 0
 }
 
-func filterIn[K comparable](keys, seq iter.Seq[K], contains bool) iter.Seq[K] {
+func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		s := Set[K]()
 		next, stop := iter.Pull(seq)
@@ -65,7 +65,33 @@ func filterIn[K comparable](keys, seq iter.Seq[K], contains bool) iter.Seq[K] {
 				}
 				s.add(k)
 			}
-			if s.contains(key) == contains && !yield(key) {
+			if s.missing(key) && !yield(key) {
+				return
+			}
+		}
+	}
+}
+
+func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		m := MapSet[K, int]{}
+		next, stop := iter.Pull(seq)
+		defer stop()
+		add := func(key K, count int) bool {
+			found := m[key] == -count
+			if found {
+				m[key] = 0
+			} else if m.missing(key) {
+				m[key] = count
+			}
+			return found
+		}
+		for key := range keys {
+			if add(key, 1) && !yield(key) {
+				return
+			}
+			k, ok := next()
+			if !ok || (add(k, -1) && !yield(k)) {
 				return
 			}
 		}
@@ -303,7 +329,7 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - space: O(k)
 func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = filterIn(keys, seq, true)
+		keys = intersect(keys, seq)
 	}
 	return keys
 }
@@ -342,7 +368,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - space: O(k)
 func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = filterIn(keys, seq, false)
+		keys = difference(keys, seq)
 	}
 	return keys
 }

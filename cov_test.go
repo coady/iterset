@@ -22,6 +22,9 @@ func TestBreak(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
+	for range Intersect(k, slices.Values([]string{"A"})) {
+		break
+	}
 	for range Intersect(k, k) {
 		break
 	}
@@ -29,6 +32,9 @@ func TestBreak(t *testing.T) {
 		t.Errorf("should be empty: %s", c)
 	}
 	for range Set("b").Difference(k) {
+		break
+	}
+	for range Difference(k, slices.Values([]string{})) {
 		break
 	}
 	for range Set("b").ReverseDifference(k) {
