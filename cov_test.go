@@ -25,6 +25,8 @@ func TestBreak(t *testing.T) {
 	for range Intersect(k, slices.Values([]string{"A"})) {
 		break
 	}
+	for range Intersect(k, slices.Values([]string{})) {
+	}
 	for range Intersect(k, k) {
 		break
 	}

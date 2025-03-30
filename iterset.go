@@ -74,15 +74,16 @@ func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 
 func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		m := MapSet[K, int]{}
+		sets := map[int]MapSet[K, struct{}]{-1: Set[K](), 0: Set[K](), 1: Set[K]()}
 		next, stop := iter.Pull(seq)
 		defer stop()
 		add := func(key K, count int) bool {
-			found := m[key] == -count
+			found := sets[-count].contains(key)
 			if found {
-				m[key] = 0
-			} else if m.missing(key) {
-				m[key] = count
+				delete(sets[-count], key)
+				sets[0].add(key)
+			} else if sets[0].missing(key) {
+				sets[count].add(key)
 			}
 			return found
 		}
@@ -91,7 +92,16 @@ func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 				return
 			}
 			k, ok := next()
-			if !ok || (add(k, -1) && !yield(k)) {
+			if ok {
+				if add(k, -1) && !yield(k) {
+					return
+				}
+			} else if len(sets[-1]) == 0 {
+				return
+			}
+		}
+		for k, ok := next(); ok && len(sets[1]) > 0; k, ok = next() {
+			if add(k, -1) && !yield(k) {
 				return
 			}
 		}
@@ -218,6 +228,21 @@ func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 //   - time: O(k)
 func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 	return len(m) == 0 || allFunc(keys, m.missing)
+}
+
+// IsDisjoint returns whether no keys are present in the sequence.
+//
+// Related:
+//   - [MapSet.IsDisjoint] if the sequence was a map
+//
+// Performance:
+//   - time: O(k)
+//   - space: O(k)
+func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
+	for range intersect(keys, seq) {
+		return false
+	}
+	return true
 }
 
 // Add key(s) with zero value.

@@ -64,6 +64,20 @@ func BenchmarkMapSet_IsSuperset(b *testing.B) {
 	}
 }
 
+func BenchmarkMapSet_IsDisjoint(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		s.IsDisjoint(k)
+	}
+}
+
+func BenchmarkIsDisjoint(b *testing.B) {
+	s, k := setup(b)
+	for range b.N {
+		IsDisjoint(maps.Keys(s), k)
+	}
+}
+
 func BenchmarkMapSet_Intersect(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
