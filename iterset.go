@@ -31,18 +31,19 @@ func compare[K comparable](keys, seq iter.Seq[K]) int {
 	m := MapSet[K, int]{}
 	next, stop := iter.Pull(seq)
 	defer stop()
-	for key := range keys {
-		for m.missing(key) {
-			k, ok := next()
-			if !ok {
-				return 1
-			}
-			m[k] += 1
-		}
-		m[key] -= 1
+	add := func(key K, count int) {
+		m[key] += count
 		if m[key] == 0 {
 			delete(m, key)
 		}
+	}
+	for key := range keys {
+		add(key, 1)
+		k, ok := next()
+		if !ok {
+			return 1
+		}
+		add(k, -1)
 	}
 	_, ok := next()
 	if ok || len(m) > 0 {
