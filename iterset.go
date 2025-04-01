@@ -35,17 +35,15 @@ func isEmpty[V any](seq iter.Seq[V]) bool {
 }
 
 func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
+	s := Set[K]()
 	return func(yield func(K) bool) {
-		s := Set[K]()
 		next, stop := iter.Pull(seq)
 		defer stop()
+		k, ok := next()
 		for key := range keys {
-			for s.missing(key) {
-				k, ok := next()
-				if !ok {
-					break
-				}
+			for ok && s.missing(key) {
 				s.add(k)
+				k, ok = next()
 			}
 			if s.missing(key) && !yield(key) {
 				return
@@ -56,34 +54,28 @@ func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 
 func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		sets := map[int]MapSet[K, struct{}]{-1: Set[K](), 0: Set[K](), 1: Set[K]()}
+		s1, s2 := Set[K](), Set[K]()
 		next, stop := iter.Pull(seq)
 		defer stop()
-		add := func(key K, count int) bool {
-			found := sets[-count].contains(key)
-			if found {
-				delete(sets[-count], key)
-				sets[0].add(key)
-			} else if sets[0].missing(key) {
-				sets[count].add(key)
-			}
-			return found
-		}
 		for key := range keys {
-			if add(key, 1) && !yield(key) {
+			if !s2.pop(key) {
+				s1.add(key)
+			} else if !yield(key) {
 				return
 			}
 			k, ok := next()
 			if ok {
-				if add(k, -1) && !yield(k) {
+				if !s1.pop(k) {
+					s2.add(k)
+				} else if !yield(k) {
 					return
 				}
-			} else if len(sets[-1]) == 0 {
+			} else if len(s2) == 0 {
 				return
 			}
 		}
-		for k, ok := next(); ok && len(sets[1]) > 0; k, ok = next() {
-			if add(k, -1) && !yield(k) {
+		for k, ok := next(); ok && len(s1) > 0; k, ok = next() {
+			if s1.pop(k) && !yield(k) {
 				return
 			}
 		}
@@ -106,6 +98,11 @@ func (m MapSet[K, V]) missing(key K) bool {
 func (m MapSet[K, V]) add(key K) {
 	var value V
 	m[key] = value
+}
+
+func (m MapSet[K, V]) pop(key K) bool {
+	defer delete(m, key)
+	return m.contains(key)
 }
 
 func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
