@@ -36,7 +36,7 @@ func BenchmarkEqual(b *testing.B) {
 		Equal(maps.Keys(s), k)
 	}
 }
-func BenchmarkEquaCounts(b *testing.B) {
+func BenchmarkEqualCounts(b *testing.B) {
 	s, k := setup(b)
 	for range b.N {
 		EqualCounts(maps.Keys(s), k)

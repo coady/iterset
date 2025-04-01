@@ -30,9 +30,6 @@ func TestBreak(t *testing.T) {
 	for range Intersect(k, k) {
 		break
 	}
-	for c := range Index(k).Difference(k) {
-		t.Errorf("should be empty: %s", c)
-	}
 	for range Set("b").Difference(k) {
 		break
 	}
@@ -41,9 +38,6 @@ func TestBreak(t *testing.T) {
 	}
 	for range Set("b").ReverseDifference(k) {
 		break
-	}
-	for c := range Index(k).SymmetricDifference(k) {
-		t.Errorf("should be empty: %s", c)
 	}
 	for range Set("b").SymmetricDifference(k) {
 		break
@@ -55,6 +49,19 @@ func TestBreak(t *testing.T) {
 	}
 	for range Keys(slices.All([]string{""})) {
 		break
+	}
+}
+
+func TestExit(t *testing.T) {
+	k := slices.Values([]string{"a", "A"})
+	for c := range Index(k).Difference(k) {
+		t.Errorf("should be empty: %s", c)
+	}
+	for c := range Index(k).SymmetricDifference(k) {
+		t.Errorf("should be empty: %s", c)
+	}
+	if IsSubset(slices.Values([]string{"b"}), k) {
+		t.Errorf("should be false")
 	}
 }
 

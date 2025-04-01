@@ -27,29 +27,11 @@ func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
 	return true
 }
 
-func compare[K comparable](keys, seq iter.Seq[K]) int {
-	m := MapSet[K, int]{}
-	next, stop := iter.Pull(seq)
-	defer stop()
-	add := func(key K, count int) {
-		m[key] += count
-		if m[key] == 0 {
-			delete(m, key)
-		}
+func isEmpty[V any](seq iter.Seq[V]) bool {
+	for range seq {
+		return false
 	}
-	for key := range keys {
-		add(key, 1)
-		k, ok := next()
-		if !ok {
-			return 1
-		}
-		add(k, -1)
-	}
-	_, ok := next()
-	if ok || len(m) > 0 {
-		return -1
-	}
-	return 0
+	return true
 }
 
 func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
@@ -173,7 +155,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func Equal[K comparable](keys, seq iter.Seq[K]) bool {
-	return compare(Unique(keys), Unique(seq)) == 0
+	return EqualCounts(Unique(keys), Unique(seq))
 }
 
 // EqualCounts returns whether the multisets of keys are equal.
@@ -186,7 +168,25 @@ func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
-	return compare(keys, seq) == 0
+	m := MapSet[K, int]{}
+	next, stop := iter.Pull(seq)
+	defer stop()
+	add := func(key K, count int) {
+		m[key] += count
+		if m[key] == 0 {
+			delete(m, key)
+		}
+	}
+	for key := range keys {
+		add(key, 1)
+		k, ok := next()
+		if !ok {
+			return false
+		}
+		add(k, -1)
+	}
+	_, ok := next()
+	return !ok && len(m) == 0
 }
 
 // IsSubset returns whether every map key is present in keys.
@@ -211,7 +211,7 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
-	return compare(Unique(keys), seq) <= 0
+	return isEmpty(difference(keys, seq))
 }
 
 // IsSuperset returns whether all keys are present.
@@ -239,10 +239,7 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
-	for range intersect(keys, seq) {
-		return false
-	}
-	return true
+	return isEmpty(intersect(keys, seq))
 }
 
 // Add key(s) with zero value.
