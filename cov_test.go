@@ -10,6 +10,9 @@ import (
 
 func TestBreak(t *testing.T) {
 	k := slices.Values([]string{"a", "A"})
+	for range Unique(k) {
+		break
+	}
 	for range UniqueBy(k, strings.ToLower) {
 		break
 	}

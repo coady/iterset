@@ -52,30 +52,44 @@ func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
-func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
-	return func(yield func(K) bool) {
-		s1, s2 := Set[K](), Set[K]()
+type zipSource struct {
+	Index int8 // which sequence the value is from
+	Empty bool // whether the other sequence is empty
+}
+
+func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
+	return func(yield func(K, zipSource) bool) {
 		next, stop := iter.Pull(seq)
 		defer stop()
 		for key := range keys {
-			if !s2.pop(key) {
-				s1.add(key)
-			} else if !yield(key) {
-				return
-			}
 			k, ok := next()
 			if ok {
-				if !s1.pop(k) {
-					s2.add(k)
-				} else if !yield(k) {
+				if !yield(key, zipSource{}) || !yield(k, zipSource{Index: 1}) {
 					return
 				}
-			} else if len(s2) == 0 {
+			} else if !yield(key, zipSource{Empty: true}) {
 				return
 			}
 		}
-		for k, ok := next(); ok && len(s1) > 0; k, ok = next() {
-			if s1.pop(k) && !yield(k) {
+		for k, ok := next(); ok; k, ok = next() {
+			if !yield(k, zipSource{Index: 1, Empty: true}) {
+				return
+			}
+		}
+	}
+}
+
+func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		sets := [2]MapSet[K, struct{}]{Set[K](), Set[K]()}
+		for key, source := range zip(keys, seq) {
+			if sets[1-source.Index].pop(key) {
+				if !yield(key) {
+					return
+				}
+			} else if !source.Empty {
+				sets[source.Index].add(key)
+			} else if len(sets[1-source.Index]) == 0 {
 				return
 			}
 		}
@@ -152,7 +166,18 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func Equal[K comparable](keys, seq iter.Seq[K]) bool {
-	return EqualCounts(Unique(keys), Unique(seq))
+	sets := [3]MapSet[K, struct{}]{Set[K](), Set[K](), Set[K]()}
+	for key, source := range zip(keys, seq) {
+		if sets[1-source.Index].pop(key) {
+			sets[2].add(key)
+		} else if sets[2].missing(key) {
+			sets[source.Index].add(key)
+		}
+		if source.Empty && len(sets[source.Index]) > 0 {
+			return false
+		}
+	}
+	return len(sets[0])+len(sets[1]) == 0
 }
 
 // EqualCounts returns whether the multisets of keys are equal.
@@ -166,24 +191,16 @@ func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 //   - space: O(k)
 func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
 	m := MapSet[K, int]{}
-	next, stop := iter.Pull(seq)
-	defer stop()
-	add := func(key K, count int) {
-		m[key] += count
+	for key, source := range zip(keys, seq) {
+		if source.Empty {
+			return false
+		}
+		m[key] += int(cmp.Or(source.Index, -1))
 		if m[key] == 0 {
 			delete(m, key)
 		}
 	}
-	for key := range keys {
-		add(key, 1)
-		k, ok := next()
-		if !ok {
-			return false
-		}
-		add(k, -1)
-	}
-	_, ok := next()
-	return !ok && len(m) == 0
+	return len(m) == 0
 }
 
 // IsSubset returns whether every map key is present in keys.
