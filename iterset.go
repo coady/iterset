@@ -656,16 +656,11 @@ func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
 	return slices.SortedFunc(maps.Keys(m), compare)
 }
 
-// Min returns the key(s) with the minimum corresponding value.
-// Will be empty only if the map is empty.
-//
-// Related:
-//   - [Count] to rank by frequency
-func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
+func minFunc[K comparable, V cmp.Ordered](m map[K]V, less func(V, V) bool) []K {
 	keys := []K{}
 	var current V
 	for key, value := range m {
-		if len(keys) == 0 || value < current {
+		if len(keys) == 0 || less(value, current) {
 			keys, current = []K{key}, value
 		} else if value == current {
 			keys = append(keys, key)
@@ -674,22 +669,22 @@ func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
 	return keys
 }
 
+// Min returns the key(s) with the minimum corresponding value.
+// Will be empty only if the map is empty.
+//
+// Related:
+//   - [Count] to rank by frequency
+func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
+	return minFunc(m, cmp.Less)
+}
+
 // Max returns the key(s) with the maximum corresponding value.
 // Will be empty only if the map is empty.
 //
 // Related:
 //   - [Count] to rank by frequency
 func Max[K comparable, V cmp.Ordered](m map[K]V) []K {
-	keys := []K{}
-	var current V
-	for key, value := range m {
-		if len(keys) == 0 || value > current {
-			keys, current = []K{key}, value
-		} else if value == current {
-			keys = append(keys, key)
-		}
-	}
-	return keys
+	return minFunc(m, func(a, b V) bool { return cmp.Less(b, a) })
 }
 
 // Size returns the number of values in a sequence.
@@ -725,7 +720,7 @@ func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 		defer stop()
 		k, ok := next()
 		for key := range keys {
-			for ok && k < key {
+			for ok && cmp.Less(k, key) {
 				if !yield(k) {
 					return
 				}
@@ -747,7 +742,7 @@ func sortedMerge[K cmp.Ordered](keys, seq iter.Seq[K], inter bool) iter.Seq[K] {
 		defer stop()
 		k, ok := next()
 		for key := range keys {
-			for ok && k < key {
+			for ok && cmp.Less(k, key) {
 				k, ok = next()
 			}
 			if inter == (ok && k == key) && !yield(key) {
