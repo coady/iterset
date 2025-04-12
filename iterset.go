@@ -322,6 +322,7 @@ func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 //
 // Related:
 //   - [maps.Insert] to modify in-place
+//   - [SortedUnion] for sorted sequences
 //
 // Performance:
 //   - time: Θ(m+k)
@@ -359,6 +360,7 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 //
 // Related:
 //   - [MapSet.Intersect] if the sequence was a map
+//   - [SortedIntersect] if sequences are sorted
 //
 // Performance:
 //   - time: O(k)
@@ -398,6 +400,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 //
 // Related:
 //   - [MapSet.ReverseDifference] if the sequence was a map
+//   - [SortedDifference] if sequences are sorted
 //
 // Performance:
 //   - time: O(k)
@@ -710,4 +713,56 @@ func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 			}
 		}
 	}
+}
+
+// SortedUnion returns the union of sorted keys.
+//
+// Related:
+//   - [Compact] to deduplicate
+func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		next, stop := iter.Pull(seq)
+		defer stop()
+		k, ok := next()
+		for key := range keys {
+			for ok && k < key {
+				if !yield(k) {
+					return
+				}
+				k, ok = next()
+			}
+			if !yield(key) {
+				return
+			}
+		}
+		for ok && yield(k) {
+			k, ok = next()
+		}
+	}
+}
+
+func sortedMerge[K cmp.Ordered](keys, seq iter.Seq[K], inter bool) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		next, stop := iter.Pull(seq)
+		defer stop()
+		k, ok := next()
+		for key := range keys {
+			for ok && k < key {
+				k, ok = next()
+			}
+			if inter == (ok && k == key) && !yield(key) {
+				return
+			}
+		}
+	}
+}
+
+// SortedIntersect returns the intersection of sorted keys.
+func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return sortedMerge(keys, seq, true)
+}
+
+// SortedDifference returns the difference of sorted keys.
+func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return sortedMerge(keys, seq, false)
 }

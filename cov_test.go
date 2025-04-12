@@ -50,6 +50,15 @@ func TestBreak(t *testing.T) {
 			break
 		}
 	}
+	for range SortedUnion(k, slices.Values([]string{})) {
+		break
+	}
+	for range SortedUnion(k, slices.Values([]string{""})) {
+		break
+	}
+	for range SortedIntersect(k, slices.Values([]string{"a"})) {
+		break
+	}
 	for range Keys(slices.All([]string{""})) {
 		break
 	}

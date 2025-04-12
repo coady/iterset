@@ -46,12 +46,13 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `SymmetricDifference`
 
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway.
-* `Sorted`
 * `Equal{Counts}`
 * `IsSubset`
 * `IsDisjoint`
 * `Intersect`
 * `Difference`
+* `Sorted`
+* `Sorted{Union,Intersect,Difference}`
 
 ## Installation
 No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.

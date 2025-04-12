@@ -355,3 +355,21 @@ func ExampleKeys() {
 	fmt.Println(slices.Collect(Keys(s)))
 	// Output: [0 1 2]
 }
+
+func ExampleSortedUnion() {
+	s1, s2 := slices.Values([]string{"b", "c"}), slices.Values([]string{"a", "b", "d"})
+	fmt.Println(slices.Collect(SortedUnion(s1, s2)))
+	// Output: [a b b c d]
+}
+
+func ExampleSortedIntersect() {
+	s1, s2 := slices.Values([]string{"b", "c"}), slices.Values([]string{"a", "b", "d"})
+	fmt.Println(slices.Collect(SortedIntersect(s1, s2)))
+	// Output: [b]
+}
+
+func ExampleSortedDifference() {
+	s1, s2 := slices.Values([]string{"b", "c"}), slices.Values([]string{"a", "b", "d"})
+	fmt.Println(slices.Collect(SortedDifference(s1, s2)))
+	// Output: [c]
+}
