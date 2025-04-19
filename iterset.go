@@ -8,9 +8,9 @@ import (
 	"slices"
 )
 
-func filterFunc[E any](values iter.Seq[E], f func(E) bool) iter.Seq[E] {
-	return func(yield func(E) bool) {
-		for value := range values {
+func filterFunc[V any](seq iter.Seq[V], f func(V) bool) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		for value := range seq {
 			if f(value) && !yield(value) {
 				return
 			}
@@ -18,8 +18,8 @@ func filterFunc[E any](values iter.Seq[E], f func(E) bool) iter.Seq[E] {
 	}
 }
 
-func allFunc[E any](values iter.Seq[E], f func(E) bool) bool {
-	for value := range values {
+func allFunc[V any](seq iter.Seq[V], f func(V) bool) bool {
+	for value := range seq {
 		if !f(value) {
 			return false
 		}
@@ -53,8 +53,8 @@ func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 }
 
 type zipSource struct {
-	Index int8 // which sequence the value is from
-	Empty bool // whether the other sequence is empty
+	index int8 // which sequence the value is from
+	empty bool // whether the other sequence is empty
 }
 
 func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
@@ -64,15 +64,15 @@ func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
 		for key := range keys {
 			k, ok := next()
 			if ok {
-				if !yield(key, zipSource{}) || !yield(k, zipSource{Index: 1}) {
+				if !yield(key, zipSource{}) || !yield(k, zipSource{index: 1}) {
 					return
 				}
-			} else if !yield(key, zipSource{Empty: true}) {
+			} else if !yield(key, zipSource{empty: true}) {
 				return
 			}
 		}
 		for k, ok := next(); ok; k, ok = next() {
-			if !yield(k, zipSource{Index: 1, Empty: true}) {
+			if !yield(k, zipSource{index: 1, empty: true}) {
 				return
 			}
 		}
@@ -83,13 +83,13 @@ func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		sets := [2]MapSet[K, struct{}]{Set[K](), Set[K]()}
 		for key, source := range zip(keys, seq) {
-			if sets[1-source.Index].pop(key) {
+			if sets[1-source.index].pop(key) {
 				if !yield(key) {
 					return
 				}
-			} else if !source.Empty {
-				sets[source.Index].add(key)
-			} else if len(sets[1-source.Index]) == 0 {
+			} else if !source.empty {
+				sets[source.index].add(key)
+			} else if len(sets[1-source.index]) == 0 {
 				return
 			}
 		}
@@ -168,12 +168,12 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 	sets := [3]MapSet[K, struct{}]{Set[K](), Set[K](), Set[K]()}
 	for key, source := range zip(keys, seq) {
-		if sets[1-source.Index].pop(key) {
+		if sets[1-source.index].pop(key) {
 			sets[2].add(key)
 		} else if sets[2].missing(key) {
-			sets[source.Index].add(key)
+			sets[source.index].add(key)
 		}
-		if source.Empty && len(sets[source.Index]) > 0 {
+		if source.empty && len(sets[source.index]) > 0 {
 			return false
 		}
 	}
@@ -192,10 +192,10 @@ func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
 	m := MapSet[K, int]{}
 	for key, source := range zip(keys, seq) {
-		if source.Empty {
+		if source.empty {
 			return false
 		}
-		m[key] += int(cmp.Or(source.Index, -1))
+		m[key] += int(cmp.Or(source.index, -1))
 		if m[key] == 0 {
 			delete(m, key)
 		}
