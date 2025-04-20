@@ -71,10 +71,8 @@ func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
 				return
 			}
 		}
-		for k, ok := next(); ok; k, ok = next() {
-			if !yield(k, zipSource{index: 1, empty: true}) {
-				return
-			}
+		source := zipSource{index: 1, empty: true}
+		for k, ok := next(); ok && yield(k, source); k, ok = next() {
 		}
 	}
 }
@@ -714,6 +712,9 @@ func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 //
 // Related:
 //   - [Compact] to deduplicate
+//
+// Performance:
+//   - time: O(k)
 func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		next, stop := iter.Pull(seq)
@@ -736,7 +737,11 @@ func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
-func sortedMerge[K cmp.Ordered](keys, seq iter.Seq[K], inter bool) iter.Seq[K] {
+// SortedIntersect returns the intersection of sorted keys.
+//
+// Performance:
+//   - time: O(k)
+func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		next, stop := iter.Pull(seq)
 		defer stop()
@@ -745,19 +750,29 @@ func sortedMerge[K cmp.Ordered](keys, seq iter.Seq[K], inter bool) iter.Seq[K] {
 			for ok && cmp.Less(k, key) {
 				k, ok = next()
 			}
-			if inter == (ok && k == key) && !yield(key) {
+			if !ok || (k == key && !yield(key)) {
 				return
 			}
 		}
 	}
 }
 
-// SortedIntersect returns the intersection of sorted keys.
-func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
-	return sortedMerge(keys, seq, true)
-}
-
 // SortedDifference returns the difference of sorted keys.
+//
+// Performance:
+//   - time: O(k)
 func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
-	return sortedMerge(keys, seq, false)
+	return func(yield func(K) bool) {
+		next, stop := iter.Pull(seq)
+		defer stop()
+		k, ok := next()
+		for key := range keys {
+			for ok && cmp.Less(k, key) {
+				k, ok = next()
+			}
+			if (!ok || k != key) && !yield(key) {
+				return
+			}
+		}
+	}
 }

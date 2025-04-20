@@ -59,6 +59,9 @@ func TestBreak(t *testing.T) {
 	for range SortedIntersect(k, slices.Values([]string{"a"})) {
 		break
 	}
+	for range SortedDifference(k, slices.Values([]string{"a"})) {
+		break
+	}
 	for range Keys(slices.All([]string{""})) {
 		break
 	}
