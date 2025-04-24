@@ -654,10 +654,10 @@ func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
 	return slices.SortedFunc(maps.Keys(m), compare)
 }
 
-func minFunc[K comparable, V cmp.Ordered](m map[K]V, less func(V, V) bool) []K {
+func minFunc[K any, V cmp.Ordered](seq iter.Seq2[K, V], less func(V, V) bool) []K {
 	keys := []K{}
 	var current V
-	for key, value := range m {
+	for key, value := range seq {
 		if len(keys) == 0 || less(value, current) {
 			keys, current = []K{key}, value
 		} else if value == current {
@@ -668,21 +668,21 @@ func minFunc[K comparable, V cmp.Ordered](m map[K]V, less func(V, V) bool) []K {
 }
 
 // Min returns the key(s) with the minimum corresponding value.
-// Will be empty only if the map is empty.
+// Will be empty only if the sequence is empty.
 //
 // Related:
 //   - [Count] to rank by frequency
-func Min[K comparable, V cmp.Ordered](m map[K]V) []K {
-	return minFunc(m, cmp.Less)
+func Min[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
+	return minFunc(seq, cmp.Less)
 }
 
 // Max returns the key(s) with the maximum corresponding value.
-// Will be empty only if the map is empty.
+// Will be empty only if the sequence is empty.
 //
 // Related:
 //   - [Count] to rank by frequency
-func Max[K comparable, V cmp.Ordered](m map[K]V) []K {
-	return minFunc(m, func(a, b V) bool { return cmp.Less(b, a) })
+func Max[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
+	return minFunc(seq, func(a, b V) bool { return cmp.Less(b, a) })
 }
 
 // Size returns the number of values in a sequence.

@@ -331,14 +331,14 @@ func ExampleSorted() {
 }
 
 func ExampleMin() {
-	s := Min(map[string]int{"a": 2, "b": 1, "c": 1})
+	s := Min(maps.All(map[string]int{"a": 2, "b": 1, "c": 1}))
 	slices.Sort(s)
 	fmt.Println(s)
 	// Output: [b c]
 }
 
 func ExampleMax() {
-	s := Max(map[string]int{"a": 2, "b": 2, "c": 1})
+	s := Max(maps.All(map[string]int{"a": 2, "b": 2, "c": 1}))
 	slices.Sort(s)
 	fmt.Println(s)
 	// Output: [a b]

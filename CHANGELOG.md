@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 * `Toggle` values
+* `Min` and `Max` support sequences
 * Multi-use iterators
 * Functions optimized for shorter sequences
 
