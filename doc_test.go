@@ -379,3 +379,9 @@ func ExampleSortedDifference() {
 	fmt.Println(slices.Collect(SortedDifference(s1, s2)))
 	// Output: [c]
 }
+
+func ExampleGoIter() {
+	s := slices.Values([]string{"a", "b", "c"})
+	fmt.Println(slices.Collect(GoIter(s, 0)))
+	// Output: [a b c]
+}

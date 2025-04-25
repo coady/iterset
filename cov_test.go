@@ -65,6 +65,9 @@ func TestBreak(t *testing.T) {
 	for range Keys(slices.All([]string{""})) {
 		break
 	}
+	for range GoIter(slices.Values([]string{"", ""}), 0) {
+		break
+	}
 }
 
 func TestExit(t *testing.T) {

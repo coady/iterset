@@ -63,6 +63,7 @@ Includes general sequence utilities which complement the set operations. These a
 * `Sorted`
 * `Min`
 * `Max`
+* `GoIter`
 
 ## Installation
 No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.

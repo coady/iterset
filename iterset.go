@@ -3,6 +3,7 @@ package iterset
 
 import (
 	"cmp"
+	"context"
 	"iter"
 	"maps"
 	"slices"
@@ -772,6 +773,36 @@ func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 				k, ok = next()
 			}
 			if (!ok || k != key) && !yield(key) {
+				return
+			}
+		}
+	}
+}
+
+func goChan[V any](ctx context.Context, seq iter.Seq[V], size int) chan V {
+	ch := make(chan V, size)
+	go func() {
+		defer close(ch)
+		for value := range seq {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- value:
+			}
+		}
+	}()
+	return ch
+}
+
+// GoIter iterates the sequence in a background goroutine and channel.
+// An unbuffered channel (size 0) is sufficient for parallelism,
+// but channels introduce overhead. As always, benchmark first.
+func GoIter[V any](seq iter.Seq[V], size int) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		for value := range goChan(ctx, seq, size) {
+			if !yield(value) {
 				return
 			}
 		}
