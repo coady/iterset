@@ -27,13 +27,6 @@ func allFunc[V any](seq iter.Seq[V], f func(V) bool) bool {
 	return true
 }
 
-func isEmpty[V any](seq iter.Seq[V]) bool {
-	for range seq {
-		return false
-	}
-	return true
-}
-
 func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	s := Set[K]()
 	return func(yield func(K) bool) {
@@ -223,7 +216,7 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
-	return isEmpty(difference(keys, seq))
+	return IsEmpty(difference(keys, seq))
 }
 
 // IsSuperset returns whether all keys are present.
@@ -251,7 +244,7 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(k)
 func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
-	return isEmpty(intersect(keys, seq))
+	return IsEmpty(intersect(keys, seq))
 }
 
 // Add key(s) with zero value.
@@ -683,6 +676,14 @@ func Min[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 //   - [Count] to rank by frequency
 func Max[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 	return minFunc(seq, func(a, b V) bool { return cmp.Less(b, a) })
+}
+
+// IsEmpty returns where there are no values in a sequence.
+func IsEmpty[V any](seq iter.Seq[V]) bool {
+	for range seq {
+		return false
+	}
+	return true
 }
 
 // Size returns the number of values in a sequence.

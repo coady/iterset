@@ -22,6 +22,7 @@ So `iterset` is built around generic maps with `any` value type. Inspired by [Py
 * Iterators are lazily evaluated, inherently supporting early exits.
 
 ## Usage
+### Constructors
 There are constructors for all common use cases.
 * `Cast` a map
 * `Unique{By}` iterates keys in order
@@ -34,6 +35,7 @@ There are constructors for all common use cases.
 * `GroupBy` stores slices grouped by key function
 * `Memoize` caches function call
 
+### Methods
 Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Implementations are asymptotically optimal, and exit early where relevant.
 * `Equal`
 * `IsSubset`
@@ -45,14 +47,22 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `ReverseDifference`
 * `SymmetricDifference`
 
+### Functions
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway.
 * `Equal{Counts}`
 * `IsSubset`
 * `IsDisjoint`
 * `Intersect`
 * `Difference`
-* `Sorted`
 * `Sorted{Union,Intersect,Difference}`
+
+Includes general sequence utilities which complement the set operations. These are subject to change as [iter patterns](https://github.com/golang/go/issues/61898) progress.
+* `IsEmpty`
+* `Size`
+* `Keys`
+* `Sorted`
+* `Min`
+* `Max`
 
 ## Installation
 No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.
@@ -66,4 +76,5 @@ go get github.com/coady/iterset
 
 ```console
 go test -cover
+go test -bench=.
 ```

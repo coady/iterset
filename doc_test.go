@@ -344,6 +344,12 @@ func ExampleMax() {
 	// Output: [a b]
 }
 
+func ExampleIsEmpty() {
+	s := slices.Values([]int{})
+	fmt.Println(IsEmpty(s))
+	// Output: true
+}
+
 func ExampleSize() {
 	s := slices.Values([]int{0, 0, 0})
 	fmt.Println(Size(s))
