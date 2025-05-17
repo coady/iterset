@@ -1,6 +1,7 @@
 package iterset
 
 import (
+	"context"
 	"iter"
 	"maps"
 	"slices"
@@ -80,6 +81,11 @@ func TestExit(t *testing.T) {
 	}
 	if IsSubset(slices.Values([]string{"b"}), k) {
 		t.Errorf("should be false")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	for c := range goChan(ctx, k, 1) {
+		t.Errorf("should be canceled: %s", c)
 	}
 }
 

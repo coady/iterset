@@ -779,11 +779,14 @@ func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
-func goChan[V any](ctx context.Context, seq iter.Seq[V], size int) chan V {
+func goChan[V any](ctx context.Context, seq iter.Seq[V], size int) <-chan V {
 	ch := make(chan V, size)
 	go func() {
 		defer close(ch)
 		for value := range seq {
+			if ctx.Err() != nil {
+				return
+			}
 			select {
 			case <-ctx.Done():
 				return
