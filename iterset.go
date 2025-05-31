@@ -57,11 +57,7 @@ func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
 		defer stop()
 		for key := range keys {
 			k, ok := next()
-			if ok {
-				if !yield(key, zipSource{}) || !yield(k, zipSource{index: 1}) {
-					return
-				}
-			} else if !yield(key, zipSource{empty: true}) {
+			if !yield(key, zipSource{empty: !ok}) || (ok && !yield(k, zipSource{index: 1})) {
 				return
 			}
 		}
@@ -613,6 +609,18 @@ func IndexBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, V
 	return m
 }
 
+// Group returns values grouped by keys.
+//
+// Related:
+//   - [GroupBy] for key function
+func Group[K comparable, V any](seq iter.Seq2[K, V]) MapSet[K, []V] {
+	m := MapSet[K, []V]{}
+	for key, value := range seq {
+		m[key] = append(m[key], value)
+	}
+	return m
+}
+
 // GroupBy returns values grouped by key function.
 //
 // Related:
@@ -623,6 +631,22 @@ func GroupBy[K comparable, V any](values iter.Seq[V], key func(V) K) MapSet[K, [
 	for value := range values {
 		k := key(value)
 		m[k] = append(m[k], value)
+	}
+	return m
+}
+
+// Reduce combines values grouped by keys with binary function.
+//
+// Related:
+//   - [Group] to collect into a slice
+func Reduce[K comparable, V any](seq iter.Seq2[K, V], f func(V, V) V) MapSet[K, V] {
+	m := MapSet[K, V]{}
+	for key, value := range seq {
+		v, ok := m[key]
+		if ok {
+			value = f(v, value)
+		}
+		m[key] = value
 	}
 	return m
 }
@@ -702,11 +726,7 @@ func Size[V any](seq iter.Seq[V]) int {
 //   - [maps.Keys] for a map
 func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		for key := range seq {
-			if !yield(key) {
-				return
-			}
-		}
+		seq(func(key K, _ V) bool { return yield(key) })
 	}
 }
 

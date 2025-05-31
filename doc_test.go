@@ -314,10 +314,26 @@ func ExampleIndexBy() {
 	// Output: map[a:a b:b]
 }
 
+func ExampleGroup() {
+	seq := func(yield func(string, int) bool) {
+		_ = yield("a", 1) && yield("b", 2) && yield("a", 3)
+	}
+	fmt.Println(Group(seq))
+	// Output: map[a:[1 3] b:[2]]
+}
+
 func ExampleGroupBy() {
 	v := slices.Values([]string{"B", "a", "b"})
 	fmt.Println(GroupBy(v, strings.ToLower))
 	// Output: map[a:[a] b:[B b]]
+}
+
+func ExampleReduce() {
+	seq := func(yield func(string, int) bool) {
+		_ = yield("a", 1) && yield("b", 2) && yield("a", 3)
+	}
+	fmt.Println(Reduce(seq, func(i, j int) int { return i + j }))
+	// Output: map[a:4 b:2]
 }
 
 func ExampleMemoize() {

@@ -1,6 +1,7 @@
 [![build](https://github.com/coady/iterset/actions/workflows/build.yml/badge.svg)](https://github.com/coady/iterset/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/coady/iterset/branch/main/graph/badge.svg)](https://codecov.io/gh/coady/iterset/)
 [![go report](https://goreportcard.com/badge/github.com/coady/iterset)](https://goreportcard.com/report/github.com/coady/iterset)
+[![go ref](https://pkg.go.dev/badge/github.com/coady/iterset.svg)](https://pkg.go.dev/github.com/coady/iterset)
 
 # iterset
 A [set](https://en.wikipedia.org/wiki/Set_(abstract_data_type)) library based on maps and [iterators](https://pkg.go.dev/iter). A set type is not necessary to have set operations.
@@ -32,7 +33,8 @@ There are constructors for all common use cases.
 * `Index` retains original position
 * `Count` stores key counts
 * `IndexBy` stores values by key function
-* `GroupBy` stores slices grouped by key function
+* `Group{By}` stores slices grouped by keys
+* `Reduce` combines values grouped by keys
 * `Memoize` caches function call
 
 ### Methods
