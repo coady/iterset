@@ -242,6 +242,12 @@ func ExampleMapSet_SymmetricDifference() {
 	// Output: [c a]
 }
 
+func ExampleMapSet_Overlap() {
+	s, k := Set("a", "b", "c"), []string{"b", "c", "d"}
+	fmt.Println(s.Overlap(slices.Values(k)))
+	// Output: 1 2 1
+}
+
 func ExampleCast() {
 	m := map[string]bool{}
 	Cast(m).Add("a")

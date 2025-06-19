@@ -444,6 +444,28 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
+// Overlap returns the sizes of the intersection and differences:
+// left only, both, right only.
+//
+// Similarity measures:
+//   - overlap coefficient: both / (min(left, right) + both)
+//   - Jaccard index: both / (left + both + right)
+//
+// Performance:
+//   - time: Θ(k)
+//   - time: Θ(k)
+func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
+	inter, diff := Set[K](), Set[K]()
+	for key := range keys {
+		if m.contains(key) {
+			inter.add(key)
+		} else {
+			diff.add(key)
+		}
+	}
+	return len(m) - len(inter), len(inter), len(diff)
+}
+
 // Cast returns a zero-copy [MapSet].
 // Equivalent to `MapSet[K, V](m)` without having to specify concrete types.
 func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
