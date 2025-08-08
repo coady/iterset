@@ -453,7 +453,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 //
 // Performance:
 //   - time: Θ(k)
-//   - time: Θ(k)
+//   - space: Θ(k)
 func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
 	inter, diff := Set[K](), Set[K]()
 	for key := range keys {

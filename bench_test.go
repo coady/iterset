@@ -10,6 +10,8 @@ import (
 
 const size = 100_000
 
+func identity[V any](v V) V { return v }
+
 func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	defer b.ResetTimer()
 	s := Set[int]()
@@ -134,6 +136,14 @@ func BenchmarkUnique(b *testing.B) {
 	}
 }
 
+func BenchmarkUniqueBy(b *testing.B) {
+	_, k := setup(b)
+	for range b.N {
+		for range UniqueBy(k, identity) {
+		}
+	}
+}
+
 func BenchmarkCompact(b *testing.B) {
 	_, k := setup(b)
 	s := slices.Values(slices.Sorted(k))
@@ -144,11 +154,33 @@ func BenchmarkCompact(b *testing.B) {
 	}
 }
 
+func BenchmarkCompactBy(b *testing.B) {
+	_, k := setup(b)
+	for range b.N {
+		for range CompactBy(k, identity) {
+		}
+	}
+}
+
 func BenchmarkSet(b *testing.B) {
 	_, k := setup(b)
 	s := slices.Collect(k)
 	b.ResetTimer()
 	for range b.N {
 		Set(s...)
+	}
+}
+
+func BenchmarkIndexBy(b *testing.B) {
+	_, k := setup(b)
+	for range b.N {
+		IndexBy(k, identity)
+	}
+}
+
+func BenchmarkGroupBy(b *testing.B) {
+	_, k := setup(b)
+	for range b.N {
+		GroupBy(k, identity)
 	}
 }
