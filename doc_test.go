@@ -7,6 +7,34 @@ import (
 	"strings"
 )
 
+// Update a slice by removing common adapted keys.
+func Example_difference() {
+	values := []string{"A", "B", "C"}
+	keys := []string{"d", "c", "b"}
+	// With no sets.
+	m := map[string]bool{}
+	for _, value := range values {
+		m[strings.ToLower(value)] = true
+	}
+	keys = slices.DeleteFunc(keys, func(key string) bool { return m[key] })
+	fmt.Println(keys)
+	// A typical `mapset` would have minimal impact on readability.
+	s := Set[string]()
+	for _, value := range values {
+		s.Add(strings.ToLower(value))
+	}
+	keys = slices.DeleteFunc(keys, s.Contains)
+	fmt.Println(keys)
+	// Whereas `iterset` can in-line the set construction.
+	v := IndexBy(slices.Values(values), strings.ToLower)
+	keys = slices.DeleteFunc(keys, v.Contains)
+	fmt.Println(keys)
+	// Output:
+	// [d]
+	// [d]
+	// [d]
+}
+
 // Intersect a map with a slice of keys, retaining original order.
 func Example_intersect() {
 	data := map[string]int{"a": 0, "b": 1, "c": 2}
@@ -102,8 +130,14 @@ func Example_unique() {
 
 func ExampleMapSet_Contains() {
 	s := Set("b", "a", "b")
-	fmt.Println(s.Contains("a"), s.Contains("b", "c"))
+	fmt.Println(s.Contains("a"), s.Contains("c"))
 	// Output: true false
+}
+
+func ExampleMapSet_Missing() {
+	s := Set("b", "a", "b")
+	fmt.Println(s.Missing("a"), s.Missing("c"))
+	// Output: false true
 }
 
 func ExampleMapSet_Equal() {

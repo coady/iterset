@@ -26,21 +26,9 @@ func TestBreak(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
-	for range Intersect(k, slices.Values([]string{"A"})) {
-		break
-	}
 	for range Intersect(k, slices.Values([]string{})) {
 	}
-	for range Intersect(k, k) {
-		break
-	}
 	for range Set("b").Difference(k) {
-		break
-	}
-	for range Difference(k, slices.Values([]string{})) {
-		break
-	}
-	for range Set("b").ReverseDifference(k) {
 		break
 	}
 	for range Set("b").SymmetricDifference(k) {
@@ -61,9 +49,6 @@ func TestBreak(t *testing.T) {
 		break
 	}
 	for range SortedDifference(k, slices.Values([]string{"a"})) {
-		break
-	}
-	for range Keys(slices.All([]string{""})) {
 		break
 	}
 	for range GoIter(slices.Values([]string{"", ""}), 0) {

@@ -9,16 +9,6 @@ import (
 	"slices"
 )
 
-func filterFunc[V any](seq iter.Seq[V], f func(V) bool) iter.Seq[V] {
-	return func(yield func(V) bool) {
-		for value := range seq {
-			if f(value) && !yield(value) {
-				return
-			}
-		}
-	}
-}
-
 func allFunc[V any](seq iter.Seq[V], f func(V) bool) bool {
 	for value := range seq {
 		if !f(value) {
@@ -35,11 +25,11 @@ func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 		defer stop()
 		k, ok := next()
 		for key := range keys {
-			for ok && s.missing(key) {
+			for ok && s.Missing(key) {
 				s.add(k)
 				k, ok = next()
 			}
-			if s.missing(key) && !yield(key) {
+			if s.Missing(key) && !yield(key) {
 				return
 			}
 		}
@@ -87,16 +77,6 @@ func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 // MapSet is a `map` extended with set methods.
 type MapSet[K comparable, V any] map[K]V
 
-func (m MapSet[K, V]) contains(key K) bool {
-	_, ok := m[key]
-	return ok
-}
-
-func (m MapSet[K, V]) missing(key K) bool {
-	_, ok := m[key]
-	return !ok
-}
-
 func (m MapSet[K, V]) add(key K) {
 	var value V
 	m[key] = value
@@ -104,13 +84,13 @@ func (m MapSet[K, V]) add(key K) {
 
 func (m MapSet[K, V]) pop(key K) bool {
 	defer delete(m, key)
-	return m.contains(key)
+	return m.Contains(key)
 }
 
 func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	s := Set[K]()
 	for key := range keys {
-		if m.contains(key) {
+		if m.Contains(key) {
 			s.add(key)
 		}
 		if len(m) == len(s) {
@@ -120,12 +100,23 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	return s
 }
 
-// Contains returns whether the key(s) is present.
+// Contains returns whether the key is present.
 //
 // Related:
-//   - [MapSet.IsSuperset] for many keys
-func (m MapSet[K, V]) Contains(keys ...K) bool {
-	return !slices.ContainsFunc(keys, m.missing)
+//   - [MapSet.IsSuperset] for multiple keys
+func (m MapSet[K, V]) Contains(key K) bool {
+	_, ok := m[key]
+	return ok
+}
+
+// Missing returns whether the key is not present.
+// Negation of [MapSet.Contains]; useful to pass as a bound method.
+//
+// Related:
+//   - [MapSet.IsDisjoint] for multiple keys
+func (m MapSet[K, V]) Missing(key K) bool {
+	_, ok := m[key]
+	return !ok
 }
 
 // Equal returns whether the key sets are equivalent.
@@ -140,7 +131,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	s := Set[K]()
 	superset := allFunc(keys, func(key K) bool {
 		s.add(key)
-		return m.contains(key)
+		return m.Contains(key)
 	})
 	return superset && len(m) == len(s)
 }
@@ -158,7 +149,7 @@ func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 	for key, source := range zip(keys, seq) {
 		if sets[1-source.index].pop(key) {
 			sets[2].add(key)
-		} else if sets[2].missing(key) {
+		} else if sets[2].Missing(key) {
 			sets[source.index].add(key)
 		}
 		if source.empty && len(sets[source.index]) > 0 {
@@ -221,7 +212,7 @@ func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
-	return allFunc(keys, m.contains)
+	return allFunc(keys, m.Contains)
 }
 
 // IsDisjoint returns whether no keys are present.
@@ -229,7 +220,7 @@ func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
-	return len(m) == 0 || allFunc(keys, m.missing)
+	return len(m) == 0 || allFunc(keys, m.Missing)
 }
 
 // IsDisjoint returns whether no keys are present in the sequence.
@@ -298,7 +289,7 @@ func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
 //   - [MapSet.SymmetricDifference] to not modify in-place
 func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 	for key := range keys {
-		if m.contains(key) {
+		if m.Contains(key) {
 			delete(m, key)
 		} else {
 			m[key] = value
@@ -377,7 +368,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	}
 	return func(yield func(K, V) bool) {
 		for key, value := range m {
-			if s.missing(key) && !yield(key, value) {
+			if s.Missing(key) && !yield(key, value) {
 				return
 			}
 		}
@@ -409,7 +400,9 @@ func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 	if len(m) == 0 {
 		return keys
 	}
-	return filterFunc(keys, m.missing)
+	return func(yield func(K) bool) {
+		keys(func(key K) bool { return m.Contains(key) || yield(key) })
+	}
 }
 
 // SymmetricDifference returns keys which are not in both.
@@ -427,7 +420,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	s := Set[K]()
 	return func(yield func(K) bool) {
 		for key := range keys {
-			if m.contains(key) {
+			if m.Contains(key) {
 				s.add(key)
 			} else if !yield(key) {
 				return
@@ -437,7 +430,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 			return
 		}
 		for key := range m {
-			if s.missing(key) && !yield(key) {
+			if s.Missing(key) && !yield(key) {
 				return
 			}
 		}
@@ -457,7 +450,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
 	inter, diff := Set[K](), Set[K]()
 	for key := range keys {
-		if m.contains(key) {
+		if m.Contains(key) {
 			inter.add(key)
 		} else {
 			diff.add(key)
@@ -485,7 +478,7 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		s := Set[K]()
 		for key := range keys {
-			if s.missing(key) && !yield(key) {
+			if s.Missing(key) && !yield(key) {
 				return
 			}
 			s.add(key)
@@ -508,7 +501,7 @@ func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[
 		s := Set[K]()
 		for value := range values {
 			k := key(value)
-			if s.missing(k) && !yield(k, value) {
+			if s.Missing(k) && !yield(k, value) {
 				return
 			}
 			s.add(k)
@@ -597,7 +590,7 @@ func Index[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 	m := MapSet[K, int]{}
 	i := 0
 	for key := range keys {
-		if m.missing(key) {
+		if m.Missing(key) {
 			m[key] = i
 		}
 		i += 1
@@ -677,7 +670,7 @@ func Reduce[K comparable, V any](seq iter.Seq2[K, V], f func(V, V) V) MapSet[K, 
 func Memoize[K comparable, V any](keys iter.Seq[K], f func(K) V) MapSet[K, V] {
 	m := MapSet[K, V]{}
 	for key := range keys {
-		if m.missing(key) {
+		if m.Missing(key) {
 			m[key] = f(key)
 		}
 	}
