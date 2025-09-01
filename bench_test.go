@@ -184,3 +184,18 @@ func BenchmarkGroupBy(b *testing.B) {
 		GroupBy(k, identity)
 	}
 }
+
+func BenchmarkSorted(b *testing.B) {
+	s, k := setup(b)
+	v := slices.Values(slices.Sorted(maps.Keys(s)))
+	k = slices.Values(slices.Sorted(k))
+	b.ResetTimer()
+	for range b.N {
+		for range SortedUnion(k, v) {
+		}
+		for range SortedIntersect(k, v) {
+		}
+		for range SortedDifference(k, v) {
+		}
+	}
+}

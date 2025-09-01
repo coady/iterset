@@ -753,23 +753,27 @@ func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
-	return func(yield func(K) bool) {
-		next, stop := iter.Pull(seq)
+	return sortedUnionFunc(keys, seq, cmp.Compare)
+}
+
+func sortedUnionFunc[V any](keys, values iter.Seq[V], compare func(V, V) int) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		next, stop := iter.Pull(values)
 		defer stop()
-		k, ok := next()
+		value, ok := next()
 		for key := range keys {
-			for ok && cmp.Less(k, key) {
-				if !yield(k) {
+			for ok && compare(key, value) > 0 {
+				if !yield(value) {
 					return
 				}
-				k, ok = next()
+				value, ok = next()
 			}
 			if !yield(key) {
 				return
 			}
 		}
-		for ok && yield(k) {
-			k, ok = next()
+		for ok && yield(value) {
+			value, ok = next()
 		}
 	}
 }
@@ -779,15 +783,26 @@ func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
-	return func(yield func(K) bool) {
-		next, stop := iter.Pull(seq)
+	return Keys(sortedIntersectFunc(keys, seq, cmp.Compare))
+}
+
+func sortedIntersectFunc[K, V any](
+	keys iter.Seq[K], values iter.Seq[V], compare func(K, V) int,
+) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		next, stop := iter.Pull(values)
 		defer stop()
-		k, ok := next()
+		value, ok := next()
 		for key := range keys {
-			for ok && cmp.Less(k, key) {
-				k, ok = next()
+			c := 1
+			for ok {
+				c = compare(key, value)
+				if c <= 0 {
+					break
+				}
+				value, ok = next()
 			}
-			if !ok || (k == key && !yield(key)) {
+			if !ok || (c == 0 && !yield(key, value)) {
 				return
 			}
 		}
@@ -799,15 +814,26 @@ func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+	return sortedDifferenceFunc(keys, seq, cmp.Compare)
+}
+
+func sortedDifferenceFunc[K, V any](
+	keys iter.Seq[K], values iter.Seq[V], compare func(K, V) int,
+) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		next, stop := iter.Pull(seq)
+		next, stop := iter.Pull(values)
 		defer stop()
-		k, ok := next()
+		value, ok := next()
 		for key := range keys {
-			for ok && cmp.Less(k, key) {
-				k, ok = next()
+			c := 1
+			for ok {
+				c = compare(key, value)
+				if c <= 0 {
+					break
+				}
+				value, ok = next()
 			}
-			if (!ok || k != key) && !yield(key) {
+			if c != 0 && !yield(key) {
 				return
 			}
 		}
