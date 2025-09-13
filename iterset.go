@@ -461,6 +461,9 @@ func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
 
 // Cast returns a zero-copy [MapSet].
 // Equivalent to `MapSet[K, V](m)` without having to specify concrete types.
+//
+// An instantiated type alias would have the same functionality.
+// Methods can also be called as unbound functions: `MapSet[K, V].Method(m, ...)`.
 func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 	return m
 }

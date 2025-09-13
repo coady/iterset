@@ -67,6 +67,8 @@ Includes general sequence utilities which complement the set operations. These a
 * `Max`
 * `GoIter`
 
+Iterators are only [single-use](https://pkg.go.dev/iter#hdr-Single_Use_Iterators) if their input was.
+
 ## Installation
 No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.
 

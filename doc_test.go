@@ -286,6 +286,10 @@ func ExampleCast() {
 	m := map[string]bool{}
 	Cast(m).Add("a")
 	fmt.Println(m)
+	// equivalent to
+	type aSet = MapSet[string, bool]
+	aSet(m).Add("a")
+	aSet.Add(m, "a'")
 	// Output: map[a:false]
 }
 
