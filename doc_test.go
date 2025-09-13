@@ -381,6 +381,12 @@ func ExampleMemoize() {
 	// Output: map[a:A b:B]
 }
 
+func ExampleCompareValues() {
+	c := CompareValues(Index(slices.Values([]string{"c", "b", "a"})))
+	fmt.Println(slices.SortedFunc(slices.Values([]string{"a", "b"}), c))
+	// Output: [b a]
+}
+
 func ExampleSorted() {
 	fmt.Println(Sorted(Index(slices.Values([]string{"b", "a", "b"}))))
 	// Output: [b a]

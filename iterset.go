@@ -677,17 +677,26 @@ func Memoize[K comparable, V any](keys iter.Seq[K], f func(K) V) MapSet[K, V] {
 	return m
 }
 
+// CompareValues returns a function which compares by value.
+//
+// Related:
+//   - [Sorted] to sort by value
+//   - [slices] functions with a custom [cmp.Compare]
+func CompareValues[K comparable, V cmp.Ordered](m map[K]V) func(K, K) int {
+	return func(a, b K) int { return cmp.Compare(m[a], m[b]) }
+}
+
 // Sorted returns keys ordered by corresponding value.
 //
 // Related:
 //   - [Index] to retain original order
 //   - [Count] to rank by frequency
+//   - [slices.SortedFunc] with [CompareValues]
 func Sorted[K comparable, V cmp.Ordered](m map[K]V) []K {
-	compare := func(a, b K) int { return cmp.Compare(m[a], m[b]) }
-	return slices.SortedFunc(maps.Keys(m), compare)
+	return slices.SortedFunc(maps.Keys(m), CompareValues(m))
 }
 
-func minFunc[K any, V cmp.Ordered](seq iter.Seq2[K, V], less func(V, V) bool) []K {
+func minFunc[K any, V comparable](seq iter.Seq2[K, V], less func(V, V) bool) []K {
 	keys := []K{}
 	var current V
 	for key, value := range seq {
@@ -705,6 +714,7 @@ func minFunc[K any, V cmp.Ordered](seq iter.Seq2[K, V], less func(V, V) bool) []
 //
 // Related:
 //   - [Count] to rank by frequency
+//   - [slices.MinFunc] with [CompareValues]
 func Min[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 	return minFunc(seq, cmp.Less)
 }
@@ -714,6 +724,7 @@ func Min[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 //
 // Related:
 //   - [Count] to rank by frequency
+//   - [slices.MaxFunc] with [CompareValues]
 func Max[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 	return minFunc(seq, func(a, b V) bool { return cmp.Less(b, a) })
 }
