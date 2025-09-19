@@ -1,5 +1,6 @@
 [![build](https://github.com/coady/iterset/actions/workflows/build.yml/badge.svg)](https://github.com/coady/iterset/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/coady/iterset/branch/main/graph/badge.svg)](https://codecov.io/gh/coady/iterset/)
+[![CodeQL](https://github.com/coady/iterset/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/coady/iterset/actions/workflows/github-code-scanning/codeql)
 [![go report](https://goreportcard.com/badge/github.com/coady/iterset)](https://goreportcard.com/report/github.com/coady/iterset)
 [![go ref](https://pkg.go.dev/badge/github.com/coady/iterset.svg)](https://pkg.go.dev/github.com/coady/iterset)
 
