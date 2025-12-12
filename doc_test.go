@@ -1,6 +1,7 @@
 package iterset
 
 import (
+	"context"
 	"fmt"
 	"maps"
 	"slices"
@@ -448,6 +449,6 @@ func ExampleSortedDifference() {
 
 func ExampleGoIter() {
 	s := slices.Values([]string{"a", "b", "c"})
-	fmt.Println(slices.Collect(GoIter(s, 0)))
+	fmt.Println(slices.Collect(GoIter(context.Background(), s, 0)))
 	// Output: [a b c]
 }

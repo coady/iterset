@@ -51,7 +51,7 @@ func TestBreak(t *testing.T) {
 	for range SortedDifference(k, slices.Values([]string{"a"})) {
 		break
 	}
-	for range GoIter(slices.Values([]string{"", ""}), 0) {
+	for range GoIter(context.Background(), slices.Values([]string{"", ""}), 0) {
 		break
 	}
 }

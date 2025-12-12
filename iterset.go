@@ -875,9 +875,9 @@ func goChan[V any](ctx context.Context, seq iter.Seq[V], size int) <-chan V {
 // GoIter iterates the sequence in a background goroutine and channel.
 // An unbuffered channel (size 0) is sufficient for parallelism,
 // but channels introduce overhead. As always, benchmark first.
-func GoIter[V any](seq iter.Seq[V], size int) iter.Seq[V] {
+func GoIter[V any](ctx context.Context, seq iter.Seq[V], size int) iter.Seq[V] {
 	return func(yield func(V) bool) {
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		for value := range goChan(ctx, seq, size) {
 			if !yield(value) {
