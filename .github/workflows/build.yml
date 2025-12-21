@@ -1,5 +1,8 @@
 name: build
 
+permissions:
+  id-token: write
+
 on: [workflow_dispatch, push, pull_request]
 
 jobs:
@@ -16,4 +19,4 @@ jobs:
     - run: go test -coverprofile=coverage.out
     - uses: codecov/codecov-action@v5
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
