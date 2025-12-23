@@ -13,7 +13,6 @@ const size = 100_000
 func identity[V any](v V) V { return v }
 
 func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
-	defer b.ResetTimer()
 	s := Set[int]()
 	for range size / 4 {
 		s.Add(rand.Intn(size))
@@ -27,62 +26,62 @@ func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 
 func BenchmarkMapSet_Equal(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		s.Equal(k)
 	}
 }
 
 func BenchmarkEqual(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		Equal(maps.Keys(s), k)
 	}
 }
 func BenchmarkEqualCounts(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		EqualCounts(maps.Keys(s), k)
 	}
 }
 
 func BenchmarkMapSet_IsSubset(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		s.IsSubset(k)
 	}
 }
 
 func BenchmarkIsSubset(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		IsSubset(maps.Keys(s), k)
 	}
 }
 
 func BenchmarkMapSet_IsSuperset(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		s.IsSuperset(k)
 	}
 }
 
 func BenchmarkMapSet_IsDisjoint(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		s.IsDisjoint(k)
 	}
 }
 
 func BenchmarkIsDisjoint(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		IsDisjoint(maps.Keys(s), k)
 	}
 }
 
 func BenchmarkMapSet_Intersect(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range s.Intersect(k) {
 		}
 	}
@@ -90,7 +89,7 @@ func BenchmarkMapSet_Intersect(b *testing.B) {
 
 func BenchmarkIntersect(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range Intersect(maps.Keys(s), k) {
 		}
 	}
@@ -98,7 +97,7 @@ func BenchmarkIntersect(b *testing.B) {
 
 func BenchmarkMapSet_Difference(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range s.Difference(k) {
 		}
 	}
@@ -106,7 +105,7 @@ func BenchmarkMapSet_Difference(b *testing.B) {
 
 func BenchmarkDifference(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range Difference(maps.Keys(s), k) {
 		}
 	}
@@ -114,7 +113,7 @@ func BenchmarkDifference(b *testing.B) {
 
 func BenchmarkMapSet_ReverseDifference(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range s.ReverseDifference(k) {
 		}
 	}
@@ -122,7 +121,7 @@ func BenchmarkMapSet_ReverseDifference(b *testing.B) {
 
 func BenchmarkMapSet_SymmetricDifference(b *testing.B) {
 	s, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range s.SymmetricDifference(k) {
 		}
 	}
@@ -130,7 +129,7 @@ func BenchmarkMapSet_SymmetricDifference(b *testing.B) {
 
 func BenchmarkUnique(b *testing.B) {
 	_, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range Unique(k) {
 		}
 	}
@@ -138,7 +137,7 @@ func BenchmarkUnique(b *testing.B) {
 
 func BenchmarkUniqueBy(b *testing.B) {
 	_, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range UniqueBy(k, identity) {
 		}
 	}
@@ -147,8 +146,7 @@ func BenchmarkUniqueBy(b *testing.B) {
 func BenchmarkCompact(b *testing.B) {
 	_, k := setup(b)
 	s := slices.Values(slices.Sorted(k))
-	b.ResetTimer()
-	for range b.N {
+	for b.Loop() {
 		for range Compact(s) {
 		}
 	}
@@ -156,7 +154,7 @@ func BenchmarkCompact(b *testing.B) {
 
 func BenchmarkCompactBy(b *testing.B) {
 	_, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		for range CompactBy(k, identity) {
 		}
 	}
@@ -165,22 +163,21 @@ func BenchmarkCompactBy(b *testing.B) {
 func BenchmarkSet(b *testing.B) {
 	_, k := setup(b)
 	s := slices.Collect(k)
-	b.ResetTimer()
-	for range b.N {
+	for b.Loop() {
 		Set(s...)
 	}
 }
 
 func BenchmarkIndexBy(b *testing.B) {
 	_, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		IndexBy(k, identity)
 	}
 }
 
 func BenchmarkGroupBy(b *testing.B) {
 	_, k := setup(b)
-	for range b.N {
+	for b.Loop() {
 		GroupBy(k, identity)
 	}
 }
@@ -189,8 +186,7 @@ func BenchmarkSorted(b *testing.B) {
 	s, k := setup(b)
 	v := slices.Values(slices.Sorted(maps.Keys(s)))
 	k = slices.Values(slices.Sorted(k))
-	b.ResetTimer()
-	for range b.N {
+	for b.Loop() {
 		for range SortedUnion(k, v) {
 		}
 		for range SortedIntersect(k, v) {

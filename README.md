@@ -82,5 +82,5 @@ go get github.com/coady/iterset
 
 ```console
 go test -cover
-go test -bench=.
+go test -bench=.  # Go >=1.24
 ```
