@@ -17,7 +17,7 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
     - run: go test -coverprofile=coverage.out
-    - uses: codecov/codecov-action@v6
+    - uses: codecov/codecov-action@v7
       with:
         use_oidc: true
 
