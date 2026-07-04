@@ -39,6 +39,21 @@ func BenchmarkEqual(b *testing.B) {
 		Equal(maps.Keys(s), k)
 	}
 }
+
+func BenchmarkMapSet_EqualFull(b *testing.B) {
+	s, _ := setup(b)
+	for b.Loop() {
+		s.Equal(maps.Keys(s))
+	}
+}
+
+func BenchmarkEqualFull(b *testing.B) {
+	s, _ := setup(b)
+	for b.Loop() {
+		Equal(maps.Keys(s), maps.Keys(s))
+	}
+}
+
 func BenchmarkEqualCounts(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {

@@ -26,8 +26,9 @@ func (m MapSet[K, V]) add(key K) {
 }
 
 func (m MapSet[K, V]) pop(key K) bool {
-	defer delete(m, key)
-	return m.Contains(key)
+	_, ok := m[key]
+	delete(m, key)
+	return ok
 }
 
 func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
