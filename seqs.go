@@ -313,7 +313,7 @@ func Max[K any, V cmp.Ordered](seq iter.Seq2[K, V]) []K {
 	return minFunc(seq, func(a, b V) bool { return cmp.Less(b, a) })
 }
 
-// IsEmpty returns where there are no values in a sequence.
+// IsEmpty returns whether there are no values in a sequence.
 func IsEmpty[V any](seq iter.Seq[V]) bool {
 	for range seq {
 		return false
@@ -375,6 +375,7 @@ func sortedUnionFunc[V any](keys, values iter.Seq[V], compare func(V, V) int) it
 }
 
 // SortedIntersect returns the intersection of sorted keys.
+// Duplicates are matched one-to-one.
 //
 // Performance:
 //   - time: O(k)
@@ -390,15 +391,15 @@ func sortedIntersectFunc[K, V any](
 		defer stop()
 		value, ok := next()
 		for key := range keys {
-			c := 1
-			for ok {
-				c = compare(key, value)
-				if c <= 0 {
-					break
-				}
+			for ok && compare(key, value) > 0 {
 				value, ok = next()
 			}
-			if !ok || (c == 0 && !yield(key, value)) {
+			if ok && compare(key, value) == 0 {
+				if !yield(key, value) {
+					return
+				}
+				value, ok = next()
+			} else if !ok {
 				return
 			}
 		}
@@ -406,6 +407,7 @@ func sortedIntersectFunc[K, V any](
 }
 
 // SortedDifference returns the difference of sorted keys.
+// Duplicates are matched one-to-one.
 //
 // Performance:
 //   - time: O(k)
@@ -421,15 +423,12 @@ func sortedDifferenceFunc[K, V any](
 		defer stop()
 		value, ok := next()
 		for key := range keys {
-			c := 1
-			for ok {
-				c = compare(key, value)
-				if c <= 0 {
-					break
-				}
+			for ok && compare(key, value) > 0 {
 				value, ok = next()
 			}
-			if c != 0 && !yield(key) {
+			if ok && compare(key, value) == 0 {
+				value, ok = next()
+			} else if !yield(key) {
 				return
 			}
 		}

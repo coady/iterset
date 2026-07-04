@@ -436,15 +436,15 @@ func ExampleSortedUnion() {
 }
 
 func ExampleSortedIntersect() {
-	s1, s2 := slices.Values([]string{"b", "c"}), slices.Values([]string{"a", "b", "d"})
+	s1, s2 := slices.Values([]string{"b", "c", "d", "d"}), slices.Values([]string{"a", "b", "d"})
 	fmt.Println(slices.Collect(SortedIntersect(s1, s2)))
-	// Output: [b]
+	// Output: [b d]
 }
 
 func ExampleSortedDifference() {
-	s1, s2 := slices.Values([]string{"b", "c"}), slices.Values([]string{"a", "b", "d"})
+	s1, s2 := slices.Values([]string{"b", "b", "c"}), slices.Values([]string{"a", "b", "d"})
 	fmt.Println(slices.Collect(SortedDifference(s1, s2)))
-	// Output: [c]
+	// Output: [b c]
 }
 
 func ExampleGoIter() {
