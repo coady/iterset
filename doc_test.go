@@ -169,9 +169,12 @@ func ExampleMapSet_IsSubset() {
 
 func ExampleIsSubset() {
 	s1 := slices.Values([]string{"a"})
-	s2 := slices.Values([]string{"a", "b"})
-	fmt.Println(IsSubset(s1, s2), IsSubset(s2, s1))
-	// Output: true false
+	s2 := []string{"a", "b"}
+	fmt.Println(IsSubset(s1, s2), IsSubset(slices.Values(s2), s1))
+	fmt.Println(IsSubset(slices.Values(s2), slices.Collect(s1)))
+	// Output:
+	// true false
+	// false
 }
 
 func ExampleMapSet_IsSuperset() {
@@ -260,9 +263,12 @@ func ExampleMapSet_Difference() {
 
 func ExampleDifference() {
 	s1 := slices.Values([]string{"a", "b"})
-	s2 := slices.Values([]string{"b", "c"})
+	s2 := []string{"b", "c"}
 	fmt.Println(slices.Collect(Difference(s1, s2)))
-	// Output: [a]
+	fmt.Println(slices.Collect(Difference(s1, slices.Values(s2))))
+	// Output:
+	// [a]
+	// [a]
 }
 
 func ExampleMapSet_ReverseDifference() {

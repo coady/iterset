@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 * `GoIter` accepts context parameter
 * `Sorted*` functions support multisets
+* Iteration optimized
 
 ## [0.5.0](https://github.com/coady/iterset/releases/tag/v0.5.0) - 2025-09-19
 ### Added

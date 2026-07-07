@@ -8,22 +8,42 @@ import (
 	"slices"
 )
 
-func difference[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
-	s := Set[K]()
-	return func(yield func(K) bool) {
-		next, stop := iter.Pull(seq)
-		defer stop()
-		k, ok := next()
-		for key := range keys {
-			for ok && s.Missing(key) {
-				s.add(k)
-				k, ok = next()
+type iterable[V any] interface {
+	iter.Seq[V] | []V
+}
+
+func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+	switch it := any(seq).(type) {
+	case iter.Seq[K]:
+		s := Set[K]()
+		return func(yield func(K) bool) {
+			next, stop := iter.Pull(it)
+			defer stop()
+			k, ok := next()
+			for key := range keys {
+				for ; ok && s.Missing(key); k, ok = next() {
+					s.add(k)
+				}
+				if s.Missing(key) && !yield(key) {
+					return
+				}
 			}
-			if s.Missing(key) && !yield(key) {
-				return
+		}
+	case []K:
+		s := make(MapSet[K, struct{}], len(it))
+		return func(yield func(K) bool) {
+			i := 0
+			for key := range keys {
+				for ; i < len(it) && s.Missing(key); i += 1 {
+					s.add(it[i])
+				}
+				if s.Missing(key) && !yield(key) {
+					return
+				}
 			}
 		}
 	}
+	panic("unreachable")
 }
 
 type zipSource struct {
@@ -118,7 +138,7 @@ func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsSubset[K comparable](keys, seq iter.Seq[K]) bool {
+func IsSubset[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 	return IsEmpty(difference(keys, seq))
 }
 
@@ -159,7 +179,7 @@ func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] 
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Difference[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
+func Difference[K comparable, S iterable[K]](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
 	for _, seq := range seqs {
 		keys = difference(keys, seq)
 	}

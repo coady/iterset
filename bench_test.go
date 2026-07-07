@@ -75,6 +75,14 @@ func BenchmarkIsSubset(b *testing.B) {
 	}
 }
 
+func BenchmarkIsSubsetSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		IsSubset(maps.Keys(s), slc)
+	}
+}
+
 func BenchmarkMapSet_IsSuperset(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
@@ -124,6 +132,15 @@ func BenchmarkDifference(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
 		for range Difference(maps.Keys(s), k) {
+		}
+	}
+}
+
+func BenchmarkDifferenceSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		for range Difference(maps.Keys(s), slc) {
 		}
 	}
 }
