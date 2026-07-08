@@ -33,13 +33,6 @@ func BenchmarkMapSet_Equal(b *testing.B) {
 	}
 }
 
-func BenchmarkEqual(b *testing.B) {
-	s, k := setup(b)
-	for b.Loop() {
-		Equal(maps.Keys(s), k)
-	}
-}
-
 func BenchmarkMapSet_EqualFull(b *testing.B) {
 	s, _ := setup(b)
 	for b.Loop() {
@@ -47,10 +40,25 @@ func BenchmarkMapSet_EqualFull(b *testing.B) {
 	}
 }
 
+func BenchmarkEqual(b *testing.B) {
+	s, k := setup(b)
+	for b.Loop() {
+		Equal(maps.Keys(s), k)
+	}
+}
+
 func BenchmarkEqualFull(b *testing.B) {
 	s, _ := setup(b)
 	for b.Loop() {
 		Equal(maps.Keys(s), maps.Keys(s))
+	}
+}
+
+func BenchmarkEqualSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		Equal(maps.Keys(s), slc)
 	}
 }
 

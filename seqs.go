@@ -92,19 +92,47 @@ func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Equal[K comparable](keys, seq iter.Seq[K]) bool {
-	sets := [3]MapSet[K, struct{}]{Set[K](), Set[K](), Set[K]()}
-	for key, source := range zip(keys, seq) {
-		if sets[1-source.index].pop(key) {
-			sets[2].add(key)
-		} else if sets[2].Missing(key) {
-			sets[source.index].add(key)
+func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
+	sets := [3]MapSet[K, struct{}]{{}, {}, {}}
+	switch it := any(seq).(type) {
+	case iter.Seq[K]:
+		for key, source := range zip(keys, it) {
+			if !source.empty {
+				sets[source.index].add(key)
+			} else if sets[1-source.index].pop(key) {
+				delete(sets[source.index], key)
+				sets[2].add(key)
+			} else if sets[2].Missing(key) {
+				return false
+			}
 		}
-		if source.empty && len(sets[source.index]) > 0 {
-			return false
+	case []K:
+		for i := range 3 {
+			sets[i] = make(MapSet[K, struct{}], len(it))
+		}
+		i := 0
+		for key := range keys {
+			if i < len(it) {
+				sets[0].add(key)
+				sets[1].add(it[i])
+				i += 1
+			} else if sets[1].pop(key) {
+				delete(sets[0], key)
+				sets[2].add(key)
+			} else if sets[2].Missing(key) {
+				return false
+			}
+		}
+		for _, key := range it[i:] {
+			if sets[0].pop(key) {
+				delete(sets[1], key)
+				sets[2].add(key)
+			} else if sets[2].Missing(key) {
+				return false
+			}
 		}
 	}
-	return len(sets[0])+len(sets[1]) == 0
+	return maps.EqualFunc(sets[0], sets[1], func(_, _ struct{}) bool { return true })
 }
 
 // EqualCounts returns whether the multisets of keys are equal.

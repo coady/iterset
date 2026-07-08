@@ -149,17 +149,20 @@ func ExampleMapSet_Equal() {
 
 func ExampleEqual() {
 	k := slices.Values([]string{"b", "a", "b"})
-	s := slices.Values([]string{"a"})
-	fmt.Println(Equal(k, slices.Values([]string{"a", "b"})), Equal(k, s), Equal(k, s))
-	// Output: true false false
+	fmt.Println(Equal(k, k), Equal(k, slices.Values([]string{"a"})))
+	fmt.Println(Equal(k, []string{"a", "b"}), Equal(k, []string{}))
+	fmt.Println(Equal(k, []string{"a", "b", "a", "b"}), Equal(k, []string{"a", "b", "c", "c"}))
+	// Output:
+	// true false
+	// true false
+	// true false
 }
 
 func ExampleEqualCounts() {
 	k := slices.Values([]string{"b", "a", "b"})
-	s := slices.Values([]string{"a", "b"})
-	fmt.Println(EqualCounts(k, k), EqualCounts(k, s))
-	fmt.Println(EqualCounts(s, []string{"a"}), EqualCounts(s, []string{"a", "a"}))
-	fmt.Println(EqualCounts(s, []string{"a", "b", "c"}))
+	fmt.Println(EqualCounts(k, k), EqualCounts(k, slices.Values([]string{})))
+	fmt.Println(EqualCounts(k, []string{}), EqualCounts(k, []string{"a", "a", "b"}))
+	fmt.Println(EqualCounts(k, []string{"a", "b", "b", "a"}))
 	// Output:
 	// true false
 	// false false
