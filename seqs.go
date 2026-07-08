@@ -116,15 +116,39 @@ func Equal[K comparable](keys, seq iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func EqualCounts[K comparable](keys, seq iter.Seq[K]) bool {
+func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 	m := MapSet[K, int]{}
-	for key, source := range zip(keys, seq) {
-		if source.empty {
+	switch it := any(seq).(type) {
+	case iter.Seq[K]:
+		for key, source := range zip(keys, it) {
+			if source.empty {
+				return false
+			}
+			m[key] += int(cmp.Or(source.index, -1))
+			if m[key] == 0 {
+				delete(m, key)
+			}
+		}
+	case []K:
+		m = make(MapSet[K, int], len(it))
+		count := 0
+		for key := range keys {
+			m[key] += 1
+			count += 1
+			if count > len(it) {
+				return false
+			}
+		}
+		if count < len(it) {
 			return false
 		}
-		m[key] += int(cmp.Or(source.index, -1))
-		if m[key] == 0 {
-			delete(m, key)
+		for _, key := range it {
+			m[key] -= 1
+			if m[key] < 0 {
+				return false
+			} else if m[key] == 0 {
+				delete(m, key)
+			}
 		}
 	}
 	return len(m) == 0

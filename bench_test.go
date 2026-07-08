@@ -61,6 +61,14 @@ func BenchmarkEqualCounts(b *testing.B) {
 	}
 }
 
+func BenchmarkEqualCountsSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		EqualCounts(maps.Keys(s), slc)
+	}
+}
+
 func BenchmarkMapSet_IsSubset(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
