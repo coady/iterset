@@ -262,3 +262,17 @@ func BenchmarkSorted(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkSortedSlice(b *testing.B) {
+	s, k := setup(b)
+	v := slices.Sorted(maps.Keys(s))
+	k = slices.Values(slices.Sorted(k))
+	for b.Loop() {
+		for range SortedUnion(k, v) {
+		}
+		for range SortedIntersect(k, v) {
+		}
+		for range SortedDifference(k, v) {
+		}
+	}
+}

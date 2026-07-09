@@ -12,39 +12,49 @@ type iterable[V any] interface {
 	iter.Seq[V] | []V
 }
 
-func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
-	var it iter.Seq[K]
-	switch seq := any(seq).(type) {
-	case iter.Seq[K]:
-		s := Set[K]()
-		it = func(yield func(K) bool) {
-			next, stop := iter.Pull(seq)
-			defer stop()
-			k, ok := next()
-			for key := range keys {
-				for ; ok && s.Missing(key); k, ok = next() {
-					s.add(k)
-				}
-				if s.Missing(key) && !yield(key) {
-					return
-				}
+func sized[V any, I iterable[V]](it I) int {
+	slc, ok := any(it).([]V)
+	if ok {
+		return len(slc)
+	}
+	return 0
+}
+
+func pull[V any, I iterable[V]](it I) (next func() (V, bool), stop func()) {
+	stop = func() {}
+	switch it := any(it).(type) {
+	case iter.Seq[V]:
+		next, stop = iter.Pull(it)
+	case []V:
+		i := 0
+		var zero V
+		next = func() (V, bool) {
+			if i >= len(it) {
+				return zero, false
 			}
+			value := it[i]
+			i += 1
+			return value, true
 		}
-	case []K:
-		s := make(MapSet[K, struct{}], len(seq))
-		it = func(yield func(K) bool) {
-			i := 0
-			for key := range keys {
-				for ; i < len(seq) && s.Missing(key); i += 1 {
-					s.add(seq[i])
-				}
-				if s.Missing(key) && !yield(key) {
-					return
-				}
+	}
+	return next, stop
+}
+
+func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+	s := make(MapSet[K, struct{}], sized[K](seq))
+	return func(yield func(K) bool) {
+		next, stop := pull[K](seq)
+		defer stop()
+		k, ok := next()
+		for key := range keys {
+			for ; ok && s.Missing(key); k, ok = next() {
+				s.add(k)
+			}
+			if s.Missing(key) && !yield(key) {
+				return
 			}
 		}
 	}
-	return it
 }
 
 type zipSource struct {
@@ -54,38 +64,19 @@ type zipSource struct {
 
 func zip[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq2[K, zipSource] {
 	source := zipSource{index: 1}
-	var it iter.Seq2[K, zipSource]
-	switch seq := any(seq).(type) {
-	case iter.Seq[K]:
-		it = func(yield func(K, zipSource) bool) {
-			next, stop := iter.Pull(seq)
-			defer stop()
-			for key := range keys {
-				k, ok := next()
-				if !yield(key, zipSource{empty: !ok}) || (ok && !yield(k, source)) {
-					return
-				}
-			}
-			source.empty = true
-			for k, ok := next(); ok && yield(k, source); k, ok = next() {
+	return func(yield func(K, zipSource) bool) {
+		next, stop := pull[K](seq)
+		defer stop()
+		for key := range keys {
+			k, ok := next()
+			if !yield(key, zipSource{empty: !ok}) || (ok && !yield(k, source)) {
+				return
 			}
 		}
-	case []K:
-		it = func(yield func(K, zipSource) bool) {
-			i := 0
-			for key := range keys {
-				ok := i < len(seq)
-				if !yield(key, zipSource{empty: !ok}) || (ok && !yield(seq[i], source)) {
-					return
-				}
-				i += 1
-			}
-			source.empty = true
-			for ; i < len(seq) && yield(seq[i], source); i += 1 {
-			}
+		source.empty = true
+		for k, ok := next(); ok && yield(k, source); k, ok = next() {
 		}
 	}
-	return it
 }
 
 func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
@@ -119,12 +110,9 @@ func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K]
 //   - time: O(k)
 //   - space: O(k)
 func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
-	sets := [3]MapSet[K, struct{}]{{}, {}, {}}
-	it, ok := any(seq).([]K)
-	if ok {
-		for i := range sets {
-			sets[i] = make(MapSet[K, struct{}], len(it))
-		}
+	sets, size := [3]MapSet[K, struct{}]{}, sized[K](seq)
+	for i := range sets {
+		sets[i] = make(MapSet[K, struct{}], size)
 	}
 	for key, source := range zip(keys, seq) {
 		if !source.empty {
@@ -149,7 +137,7 @@ func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 //   - time: O(k)
 //   - space: O(k)
 func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
-	m := MapSet[K, int]{}
+	m := make(MapSet[K, int], sized[K](seq))
 	switch it := any(seq).(type) {
 	case iter.Seq[K]:
 		for key, source := range zip(keys, it) {
@@ -162,7 +150,6 @@ func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 			}
 		}
 	case []K:
-		m = make(MapSet[K, int], len(it))
 		count := 0
 		for key := range keys {
 			m[key] += 1
@@ -425,13 +412,15 @@ func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 //
 // Performance:
 //   - time: O(k)
-func SortedUnion[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+func SortedUnion[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return sortedUnionFunc(keys, seq, cmp.Compare)
 }
 
-func sortedUnionFunc[V any](keys, values iter.Seq[V], compare func(V, V) int) iter.Seq[V] {
+func sortedUnionFunc[V any, S iterable[V]](
+	keys iter.Seq[V], values S, compare func(V, V) int,
+) iter.Seq[V] {
 	return func(yield func(V) bool) {
-		next, stop := iter.Pull(values)
+		next, stop := pull[V](values)
 		defer stop()
 		value, ok := next()
 		for key := range keys {
@@ -456,15 +445,15 @@ func sortedUnionFunc[V any](keys, values iter.Seq[V], compare func(V, V) int) it
 //
 // Performance:
 //   - time: O(k)
-func SortedIntersect[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+func SortedIntersect[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return Keys(sortedIntersectFunc(keys, seq, cmp.Compare))
 }
 
-func sortedIntersectFunc[K, V any](
-	keys iter.Seq[K], values iter.Seq[V], compare func(K, V) int,
+func sortedIntersectFunc[K, V any, S iterable[V]](
+	keys iter.Seq[K], values S, compare func(K, V) int,
 ) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		next, stop := iter.Pull(values)
+		next, stop := pull[V](values)
 		defer stop()
 		value, ok := next()
 		for key := range keys {
@@ -488,15 +477,15 @@ func sortedIntersectFunc[K, V any](
 //
 // Performance:
 //   - time: O(k)
-func SortedDifference[K cmp.Ordered](keys, seq iter.Seq[K]) iter.Seq[K] {
+func SortedDifference[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return sortedDifferenceFunc(keys, seq, cmp.Compare)
 }
 
-func sortedDifferenceFunc[K, V any](
-	keys iter.Seq[K], values iter.Seq[V], compare func(K, V) int,
+func sortedDifferenceFunc[K, V any, S iterable[V]](
+	keys iter.Seq[K], values S, compare func(K, V) int,
 ) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		next, stop := iter.Pull(values)
+		next, stop := pull[V](values)
 		defer stop()
 		value, ok := next()
 		for key := range keys {
