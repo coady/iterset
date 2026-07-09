@@ -26,8 +26,6 @@ func TestBreak(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
-	for range Intersect(k, slices.Values([]string{})) {
-	}
 	for range Set("b").Difference(k) {
 		break
 	}
@@ -66,6 +64,8 @@ func TestExit(t *testing.T) {
 	}
 	if IsSubset(slices.Values([]string{"b"}), k) {
 		t.Errorf("should be false")
+	}
+	for range Intersect(k, slices.Values([]string{})) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

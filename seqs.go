@@ -13,11 +13,12 @@ type iterable[V any] interface {
 }
 
 func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
-	switch it := any(seq).(type) {
+	var it iter.Seq[K]
+	switch seq := any(seq).(type) {
 	case iter.Seq[K]:
 		s := Set[K]()
-		return func(yield func(K) bool) {
-			next, stop := iter.Pull(it)
+		it = func(yield func(K) bool) {
+			next, stop := iter.Pull(seq)
 			defer stop()
 			k, ok := next()
 			for key := range keys {
@@ -30,12 +31,12 @@ func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K
 			}
 		}
 	case []K:
-		s := make(MapSet[K, struct{}], len(it))
-		return func(yield func(K) bool) {
+		s := make(MapSet[K, struct{}], len(seq))
+		it = func(yield func(K) bool) {
 			i := 0
 			for key := range keys {
-				for ; i < len(it) && s.Missing(key); i += 1 {
-					s.add(it[i])
+				for ; i < len(seq) && s.Missing(key); i += 1 {
+					s.add(seq[i])
 				}
 				if s.Missing(key) && !yield(key) {
 					return
@@ -43,7 +44,7 @@ func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K
 			}
 		}
 	}
-	panic("unreachable")
+	return it
 }
 
 type zipSource struct {
@@ -51,23 +52,43 @@ type zipSource struct {
 	empty bool // whether the other sequence is empty
 }
 
-func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
-	return func(yield func(K, zipSource) bool) {
-		next, stop := iter.Pull(seq)
-		defer stop()
-		for key := range keys {
-			k, ok := next()
-			if !yield(key, zipSource{empty: !ok}) || (ok && !yield(k, zipSource{index: 1})) {
-				return
+func zip[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq2[K, zipSource] {
+	source := zipSource{index: 1}
+	var it iter.Seq2[K, zipSource]
+	switch seq := any(seq).(type) {
+	case iter.Seq[K]:
+		it = func(yield func(K, zipSource) bool) {
+			next, stop := iter.Pull(seq)
+			defer stop()
+			for key := range keys {
+				k, ok := next()
+				if !yield(key, zipSource{empty: !ok}) || (ok && !yield(k, source)) {
+					return
+				}
+			}
+			source.empty = true
+			for k, ok := next(); ok && yield(k, source); k, ok = next() {
 			}
 		}
-		source := zipSource{index: 1, empty: true}
-		for k, ok := next(); ok && yield(k, source); k, ok = next() {
+	case []K:
+		it = func(yield func(K, zipSource) bool) {
+			i := 0
+			for key := range keys {
+				ok := i < len(seq)
+				if !yield(key, zipSource{empty: !ok}) || (ok && !yield(seq[i], source)) {
+					return
+				}
+				i += 1
+			}
+			source.empty = true
+			for ; i < len(seq) && yield(seq[i], source); i += 1 {
+			}
 		}
 	}
+	return it
 }
 
-func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
+func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		counts := [2]MapSet[K, int]{{}, {}}
 		for key, source := range zip(keys, seq) {
@@ -99,45 +120,23 @@ func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 //   - space: O(k)
 func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 	sets := [3]MapSet[K, struct{}]{{}, {}, {}}
-	switch it := any(seq).(type) {
-	case iter.Seq[K]:
-		for key, source := range zip(keys, it) {
-			if !source.empty {
-				sets[source.index].add(key)
-			} else if sets[1-source.index].pop(key) {
-				delete(sets[source.index], key)
-				sets[2].add(key)
-			} else if sets[2].Missing(key) {
-				return false
-			}
-		}
-	case []K:
-		for i := range 3 {
+	it, ok := any(seq).([]K)
+	if ok {
+		for i := range sets {
 			sets[i] = make(MapSet[K, struct{}], len(it))
 		}
-		i := 0
-		for key := range keys {
-			if i < len(it) {
-				sets[0].add(key)
-				sets[1].add(it[i])
-				i += 1
-			} else if sets[1].pop(key) {
-				delete(sets[0], key)
-				sets[2].add(key)
-			} else if sets[2].Missing(key) {
-				return false
-			}
-		}
-		for _, key := range it[i:] {
-			if sets[0].pop(key) {
-				delete(sets[1], key)
-				sets[2].add(key)
-			} else if sets[2].Missing(key) {
-				return false
-			}
+	}
+	for key, source := range zip(keys, seq) {
+		if !source.empty {
+			sets[source.index].add(key)
+		} else if sets[1-source.index].pop(key) {
+			delete(sets[source.index], key)
+			sets[2].add(key)
+		} else if sets[2].Missing(key) {
+			return false
 		}
 	}
-	return maps.EqualFunc(sets[0], sets[1], func(_, _ struct{}) bool { return true })
+	return maps.Equal(sets[0], sets[1])
 }
 
 // EqualCounts returns whether the multisets of keys are equal.
@@ -207,7 +206,7 @@ func IsSubset[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
+func IsDisjoint[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 	return IsEmpty(intersect(keys, seq))
 }
 
@@ -221,7 +220,7 @@ func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Intersect[K comparable](keys iter.Seq[K], seqs ...iter.Seq[K]) iter.Seq[K] {
+func Intersect[K comparable, S iterable[K]](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
 	for _, seq := range seqs {
 		keys = intersect(keys, seq)
 	}

@@ -199,9 +199,9 @@ func ExampleMapSet_IsDisjoint() {
 
 func ExampleIsDisjoint() {
 	k := slices.Values([]string{"a"})
-	s1 := slices.Values([]string{"b"})
+	s1 := []string{"b"}
 	s2 := slices.Values([]string{"b", "a"})
-	fmt.Println(IsDisjoint(k, s1), IsDisjoint(k, s2), IsDisjoint(s2, k))
+	fmt.Println(IsDisjoint(k, s1), IsDisjoint(k, s2), IsDisjoint(s2, s1))
 	// Output: true false false
 }
 
@@ -258,9 +258,12 @@ func ExampleMapSet_Intersect() {
 
 func ExampleIntersect() {
 	s1 := slices.Values([]string{"a", "b", "d", "b"})
-	s2 := slices.Values([]string{"a", "a", "b", "b", "c"})
+	s2 := []string{"a", "a", "b", "b", "c"}
+	fmt.Println(slices.Collect(Intersect(s1, slices.Values(s2))))
 	fmt.Println(slices.Collect(Intersect(s1, s2)))
-	// Output: [a b b]
+	// Output:
+	// [a b b]
+	// [a b b]
 }
 
 func ExampleMapSet_Difference() {

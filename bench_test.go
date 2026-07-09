@@ -120,6 +120,14 @@ func BenchmarkIsDisjoint(b *testing.B) {
 	}
 }
 
+func BenchmarkIsDisjointSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		IsDisjoint(maps.Keys(s), slc)
+	}
+}
+
 func BenchmarkMapSet_Intersect(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
@@ -132,6 +140,15 @@ func BenchmarkIntersect(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
 		for range Intersect(maps.Keys(s), k) {
+		}
+	}
+}
+
+func BenchmarkIntersectSlice(b *testing.B) {
+	s, k := setup(b)
+	slc := slices.Collect(k)
+	for b.Loop() {
+		for range Intersect(maps.Keys(s), slc) {
 		}
 	}
 }
