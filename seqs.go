@@ -69,15 +69,20 @@ func zip[K comparable](keys, seq iter.Seq[K]) iter.Seq2[K, zipSource] {
 
 func intersect[K comparable](keys, seq iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
-		sets := [2]MapSet[K, struct{}]{Set[K](), Set[K]()}
+		counts := [2]MapSet[K, int]{{}, {}}
 		for key, source := range zip(keys, seq) {
-			if sets[1-source.index].pop(key) {
+			m := counts[1-source.index]
+			if m[key] > 0 {
+				m[key] -= 1
+				if m[key] == 0 {
+					delete(m, key)
+				}
 				if !yield(key) {
 					return
 				}
 			} else if !source.empty {
-				sets[source.index].add(key)
-			} else if len(sets[1-source.index]) == 0 {
+				counts[source.index][key] += 1
+			} else if len(m) == 0 {
 				return
 			}
 		}
@@ -207,6 +212,7 @@ func IsDisjoint[K comparable](keys, seq iter.Seq[K]) bool {
 }
 
 // Intersect returns the ordered keys which are present in the sequence(s).
+// Duplicates are matched one-to-one.
 //
 // Related:
 //   - [MapSet.Intersect] if the sequence was a map

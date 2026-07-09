@@ -257,10 +257,10 @@ func ExampleMapSet_Intersect() {
 }
 
 func ExampleIntersect() {
-	s1 := slices.Values([]string{"a", "b"})
-	s2 := slices.Values([]string{"d", "c", "b"})
+	s1 := slices.Values([]string{"a", "b", "d", "b"})
+	s2 := slices.Values([]string{"a", "a", "b", "b", "c"})
 	fmt.Println(slices.Collect(Intersect(s1, s2)))
-	// Output: [b]
+	// Output: [a b b]
 }
 
 func ExampleMapSet_Difference() {
