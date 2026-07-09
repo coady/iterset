@@ -205,7 +205,7 @@ func BenchmarkUnique(b *testing.B) {
 func BenchmarkUniqueBy(b *testing.B) {
 	_, k := setup(b)
 	for b.Loop() {
-		for range UniqueBy(k, identity) {
+		for range UniqueBy(k, identity[int]) {
 		}
 	}
 }
@@ -222,7 +222,7 @@ func BenchmarkCompact(b *testing.B) {
 func BenchmarkCompactBy(b *testing.B) {
 	_, k := setup(b)
 	for b.Loop() {
-		for range CompactBy(k, identity) {
+		for range CompactBy(k, identity[int]) {
 		}
 	}
 }
@@ -238,14 +238,14 @@ func BenchmarkSet(b *testing.B) {
 func BenchmarkIndexBy(b *testing.B) {
 	_, k := setup(b)
 	for b.Loop() {
-		IndexBy(k, identity)
+		IndexBy(k, identity[int])
 	}
 }
 
 func BenchmarkGroupBy(b *testing.B) {
 	_, k := setup(b)
 	for b.Loop() {
-		GroupBy(k, identity)
+		GroupBy(k, identity[int])
 	}
 }
 

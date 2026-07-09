@@ -27,7 +27,7 @@ func Example_difference() {
 	keys = slices.DeleteFunc(keys, s.Contains)
 	fmt.Println(keys)
 	// Whereas `iterset` can in-line the set construction.
-	v := IndexBy(slices.Values(values), strings.ToLower)
+	v := IndexBy(values, strings.ToLower)
 	keys = slices.DeleteFunc(keys, v.Contains)
 	fmt.Println(keys)
 	// Output:
@@ -318,8 +318,7 @@ func ExampleUnique() {
 }
 
 func ExampleUniqueBy() {
-	v := slices.Values([]string{"B", "a", "b"})
-	for key, value := range UniqueBy(v, strings.ToLower) {
+	for key, value := range UniqueBy([]string{"B", "a", "b"}, strings.ToLower) {
 		fmt.Println(key, value)
 	}
 	// Output:
@@ -339,8 +338,7 @@ func ExampleCompact() {
 }
 
 func ExampleCompactBy() {
-	v := slices.Values([]string{"B", "b", "A", "a", "b"})
-	for key, values := range CompactBy(v, strings.ToLower) {
+	for key, values := range CompactBy([]string{"B", "b", "A", "a", "b"}, strings.ToLower) {
 		fmt.Println(key, values)
 	}
 	// Output:
@@ -371,8 +369,7 @@ func ExampleCount() {
 }
 
 func ExampleIndexBy() {
-	v := slices.Values([]string{"B", "a", "b"})
-	fmt.Println(IndexBy(v, strings.ToLower))
+	fmt.Println(IndexBy([]string{"B", "a", "b"}, strings.ToLower))
 	// Output: map[a:a b:b]
 }
 
@@ -385,8 +382,7 @@ func ExampleGroup() {
 }
 
 func ExampleGroupBy() {
-	v := slices.Values([]string{"B", "a", "b"})
-	fmt.Println(GroupBy(v, strings.ToLower))
+	fmt.Println(GroupBy([]string{"B", "a", "b"}, strings.ToLower))
 	// Output: map[a:[a] b:[B b]]
 }
 
@@ -399,7 +395,7 @@ func ExampleReduce() {
 }
 
 func ExampleMemoize() {
-	fmt.Println(Memoize(slices.Values([]string{"b", "a", "b"}), strings.ToUpper))
+	fmt.Println(Memoize([]string{"b", "a", "b"}, strings.ToUpper))
 	// Output: map[a:A b:B]
 }
 

@@ -12,12 +12,22 @@ type iterable[V any] interface {
 	iter.Seq[V] | []V
 }
 
-func sized[V any, I iterable[V]](it I) int {
-	slc, ok := any(it).([]V)
-	if ok {
-		return len(slc)
+func sequence[V any, I iterable[V]](it I) (seq iter.Seq[V]) {
+	switch it := any(it).(type) {
+	case iter.Seq[V]:
+		seq = it
+	case []V:
+		seq = slices.Values(it)
 	}
-	return 0
+	return seq
+}
+
+func sized[K comparable, V, E any, I iterable[E]](it I) MapSet[K, V] {
+	slc, ok := any(it).([]E)
+	if ok {
+		return make(MapSet[K, V], len(slc))
+	}
+	return MapSet[K, V]{}
 }
 
 func pull[V any, I iterable[V]](it I) (next func() (V, bool), stop func()) {
@@ -41,7 +51,7 @@ func pull[V any, I iterable[V]](it I) (next func() (V, bool), stop func()) {
 }
 
 func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
-	s := make(MapSet[K, struct{}], sized[K](seq))
+	s := sized[K, struct{}, K](seq)
 	return func(yield func(K) bool) {
 		next, stop := pull[K](seq)
 		defer stop()
@@ -110,9 +120,9 @@ func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K]
 //   - time: O(k)
 //   - space: O(k)
 func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
-	sets, size := [3]MapSet[K, struct{}]{}, sized[K](seq)
+	sets := [3]MapSet[K, struct{}]{}
 	for i := range sets {
-		sets[i] = make(MapSet[K, struct{}], size)
+		sets[i] = sized[K, struct{}, K](seq)
 	}
 	for key, source := range zip(keys, seq) {
 		if !source.empty {
@@ -137,7 +147,7 @@ func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 //   - time: O(k)
 //   - space: O(k)
 func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
-	m := make(MapSet[K, int], sized[K](seq))
+	m := sized[K, int, K](seq)
 	switch it := any(seq).(type) {
 	case iter.Seq[K]:
 		for key, source := range zip(keys, it) {
@@ -261,10 +271,10 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func UniqueBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, V] {
+func UniqueBy[K comparable, V any, S iterable[V]](values S, key func(V) K) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		s := Set[K]()
-		for value := range values {
+		s := sized[K, struct{}, V](values)
+		for value := range sequence[V](values) {
 			k := key(value)
 			if s.Missing(k) && !yield(k, value) {
 				return
@@ -304,11 +314,11 @@ func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 // Related:
 //   - [UniqueBy] to ignore adjacency
 //   - [GroupBy] to return a map
-func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, []V] {
+func CompactBy[K comparable, V any, S iterable[V]](values S, key func(V) K) iter.Seq2[K, []V] {
 	return func(yield func(K, []V) bool) {
 		var current K
 		var group []V
-		for value := range values {
+		for value := range sequence[V](values) {
 			k := key(value)
 			if group != nil && k != current {
 				if !yield(current, group) {
