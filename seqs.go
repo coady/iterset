@@ -119,7 +119,7 @@ func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K]
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
+func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	sets := [3]MapSet[K, struct{}]{}
 	for i := range sets {
 		sets[i] = sized[K, struct{}, K](seq)
@@ -146,7 +146,7 @@ func Equal[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
+func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	m := sized[K, int, K](seq)
 	switch it := any(seq).(type) {
 	case iter.Seq[K]:
@@ -191,7 +191,7 @@ func EqualCounts[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsSubset[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
+func IsSubset[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	return IsEmpty(difference(keys, seq))
 }
 
@@ -203,7 +203,7 @@ func IsSubset[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsDisjoint[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
+func IsDisjoint[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	return IsEmpty(intersect(keys, seq))
 }
 
@@ -217,7 +217,7 @@ func IsDisjoint[K comparable, S iterable[K]](keys iter.Seq[K], seq S) bool {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Intersect[K comparable, S iterable[K]](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
+func Intersect[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
 	for _, seq := range seqs {
 		keys = intersect(keys, seq)
 	}
@@ -233,7 +233,7 @@ func Intersect[K comparable, S iterable[K]](keys iter.Seq[K], seqs ...S) iter.Se
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Difference[K comparable, S iterable[K]](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
+func Difference[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
 	for _, seq := range seqs {
 		keys = difference(keys, seq)
 	}
@@ -271,7 +271,7 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func UniqueBy[K comparable, V any, S iterable[V]](values S, key func(V) K) iter.Seq2[K, V] {
+func UniqueBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		s := sized[K, struct{}, V](values)
 		for value := range sequence[V](values) {
@@ -314,7 +314,7 @@ func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 // Related:
 //   - [UniqueBy] to ignore adjacency
 //   - [GroupBy] to return a map
-func CompactBy[K comparable, V any, S iterable[V]](values S, key func(V) K) iter.Seq2[K, []V] {
+func CompactBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K) iter.Seq2[K, []V] {
 	return func(yield func(K, []V) bool) {
 		var current K
 		var group []V
@@ -422,7 +422,7 @@ func Keys[K, V any](seq iter.Seq2[K, V]) iter.Seq[K] {
 //
 // Performance:
 //   - time: O(k)
-func SortedUnion[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+func SortedUnion[K cmp.Ordered, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return sortedUnionFunc(keys, seq, cmp.Compare)
 }
 
@@ -455,7 +455,7 @@ func sortedUnionFunc[V any, S iterable[V]](
 //
 // Performance:
 //   - time: O(k)
-func SortedIntersect[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+func SortedIntersect[K cmp.Ordered, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return Keys(sortedIntersectFunc(keys, seq, cmp.Compare))
 }
 
@@ -487,7 +487,7 @@ func sortedIntersectFunc[K, V any, S iterable[V]](
 //
 // Performance:
 //   - time: O(k)
-func SortedDifference[K cmp.Ordered, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+func SortedDifference[K cmp.Ordered, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return sortedDifferenceFunc(keys, seq, cmp.Compare)
 }
 

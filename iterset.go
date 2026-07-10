@@ -367,7 +367,7 @@ func Count[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 // Related:
 //   - [UniqueBy] to return an ordered sequence
 //   - [GroupBy] to retain all values
-func IndexBy[K comparable, V any, S iterable[V]](values S, key func(V) K) MapSet[K, V] {
+func IndexBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K) MapSet[K, V] {
 	m := sized[K, V, V](values)
 	for value := range sequence[V](values) {
 		m[key(value)] = value
@@ -392,7 +392,7 @@ func Group[K comparable, V any](seq iter.Seq2[K, V]) MapSet[K, []V] {
 // Related:
 //   - [IndexBy] to retain single value
 //   - [CompactBy] if the values are already grouped by key
-func GroupBy[K comparable, V any, S iterable[V]](values S, key func(V) K) MapSet[K, []V] {
+func GroupBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K) MapSet[K, []V] {
 	m := sized[K, []V, V](values)
 	for value := range sequence[V](values) {
 		k := key(value)
@@ -418,7 +418,7 @@ func Reduce[K comparable, V any](seq iter.Seq2[K, V], f func(V, V) V) MapSet[K, 
 }
 
 // Memoize caches function call.
-func Memoize[K comparable, V any, S iterable[K]](keys S, f func(K) V) MapSet[K, V] {
+func Memoize[K comparable, V any, S iter.Seq[K] | []K](keys S, f func(K) V) MapSet[K, V] {
 	m := sized[K, V, K](keys)
 	for key := range sequence[K](keys) {
 		if m.Missing(key) {
