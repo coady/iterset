@@ -120,10 +120,7 @@ func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K]
 //   - time: O(k)
 //   - space: O(k)
 func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
-	sets := [3]MapSet[K, struct{}]{}
-	for i := range sets {
-		sets[i] = sized[K, struct{}, K](seq)
-	}
+	sets := [3]MapSet[K, struct{}]{sized[K, struct{}, K](seq), sized[K, struct{}, K](seq), {}}
 	for key, source := range zip(keys, seq) {
 		if !source.empty {
 			sets[source.index].add(key)

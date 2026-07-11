@@ -141,12 +141,6 @@ func ExampleMapSet_Missing() {
 	// Output: false true
 }
 
-func ExampleMapSet_Equal() {
-	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(Set("a", "b").Equal(k), Set("a").Equal(k))
-	// Output: true false
-}
-
 func ExampleEqual() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(Equal(k, k), Equal(k, slices.Values([]string{"a"})))

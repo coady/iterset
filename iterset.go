@@ -44,6 +44,15 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	return s
 }
 
+func (m MapSet[K, V]) equal(keys iter.Seq[K]) bool {
+	s := Set[K]()
+	superset := allFunc(keys, func(key K) bool {
+		s.add(key)
+		return m.Contains(key)
+	})
+	return superset && len(m) == len(s)
+}
+
 // Contains returns whether the key is present.
 //
 // Related:
@@ -61,23 +70,6 @@ func (m MapSet[K, V]) Contains(key K) bool {
 func (m MapSet[K, V]) Missing(key K) bool {
 	_, ok := m[key]
 	return !ok
-}
-
-// Equal returns whether the key sets are equivalent.
-//
-// Related:
-//   - [maps.Equal] to compare values
-//
-// Performance:
-//   - time: O(k)
-//   - space: O(min(m, k))
-func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
-	s := Set[K]()
-	superset := allFunc(keys, func(key K) bool {
-		s.add(key)
-		return m.Contains(key)
-	})
-	return superset && len(m) == len(s)
 }
 
 // IsSuperset returns whether all keys are present.
