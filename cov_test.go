@@ -26,6 +26,9 @@ func TestBreak(t *testing.T) {
 	for range Set("a").Intersect(k) {
 		break
 	}
+	for range Set("a", "b").Difference(k) {
+		break
+	}
 	for range Set("b").Difference(k) {
 		break
 	}

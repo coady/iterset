@@ -50,8 +50,8 @@ func ExampleMapSet_Difference() {
 	s := Set("a", "b")
 	k := []string{"b", "c"}
 	fmt.Println(maps.Collect(s.Difference(slices.Values(k))))
-	fmt.Println(maps.Collect(s.Difference(Set(k...))))
+	fmt.Println(maps.Collect(s.Difference(Set(k...))), maps.Collect(s.Difference(Set[string]())))
 	// Output:
 	// map[a:{}]
-	// map[a:{}]
+	// map[a:{}] map[a:{} b:{}]
 }

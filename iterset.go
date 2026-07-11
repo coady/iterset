@@ -63,7 +63,21 @@ func (m MapSet[K, V]) filter(f func(K) bool) iter.Seq2[K, V] {
 	}
 }
 
+func (m MapSet[K, V]) difference(keys iter.Seq[K]) iter.Seq2[K, V] {
+	s := m.intersect(keys)
+	switch len(s) {
+	case 0:
+		return maps.All(m)
+	case len(m):
+		return func(func(K, V) bool) {}
+	}
+	return m.filter(s.Missing)
+}
+
 func (m MapSet[K, V]) mask(keys iter.Seq[K]) iter.Seq2[K, V] {
+	if len(m) == 0 {
+		return maps.All(m)
+	}
 	return func(yield func(K, V) bool) {
 		for key := range keys {
 			value, ok := m[key]

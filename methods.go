@@ -79,9 +79,6 @@ func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
-	if len(m) == 0 {
-		return maps.All(m)
-	}
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
@@ -104,17 +101,15 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 // Performance:
 //   - time:  O(m+k)
 //   - space: O(min(m,k))
-func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
-	var missing func(K) bool
+func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.Seq2[K, V]) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
-		s := m.intersect(keys)
-		if len(m) == len(s) {
-			return func(func(K, V) bool) {}
-		}
-		missing = s.Missing
+		it = m.difference(keys)
 	case MapSet[K, V]:
-		missing = keys.Missing
+		if len(keys) == 0 {
+			return maps.All(m)
+		}
+		it = m.filter(keys.Missing)
 	}
-	return m.filter(missing)
+	return it
 }

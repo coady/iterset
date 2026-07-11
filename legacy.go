@@ -4,7 +4,6 @@ package iterset
 
 import (
 	"iter"
-	"maps"
 )
 
 // Equal returns whether the key sets are equivalent.
@@ -45,9 +44,6 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
-	if len(m) == 0 {
-		return maps.All(m)
-	}
 	return m.mask(keys)
 }
 
@@ -62,9 +58,5 @@ func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
 //   - time:  O(m+k)
 //   - space: O(min(m,k))
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
-	s := m.intersect(keys)
-	if len(m) == len(s) {
-		return func(func(K, V) bool) {}
-	}
-	return m.filter(s.Missing)
+	return m.difference(keys)
 }
