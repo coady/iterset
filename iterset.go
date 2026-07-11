@@ -101,14 +101,6 @@ func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.Contains)
 }
 
-// IsDisjoint returns whether no keys are present.
-//
-// Performance:
-//   - time: O(k)
-func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
-	return len(m) == 0 || allFunc(keys, m.Missing)
-}
-
 // Add key(s) with zero value.
 //
 // Related:

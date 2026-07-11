@@ -32,6 +32,14 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 	return len(m) == len(m.intersect(keys))
 }
 
+// IsDisjoint returns whether no keys are present.
+//
+// Performance:
+//   - time: O(k)
+func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
+	return len(m) == 0 || allFunc(keys, m.Missing)
+}
+
 // Intersect returns the ordered key-value pairs which are present in both.
 //
 // Performance:

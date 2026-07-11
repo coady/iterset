@@ -20,6 +20,12 @@ func ExampleMapSet_IsSubset() {
 	// Output: true false
 }
 
+func ExampleMapSet_IsDisjoint() {
+	k := slices.Values([]string{"b", "a", "b"})
+	fmt.Println(Set("c").IsDisjoint(k), Set("a").IsDisjoint(k))
+	// Output: true false
+}
+
 func ExampleMapSet_Intersect() {
 	m := MapSet[string, int]{"a": 0, "b": 1}
 	s := slices.Values([]string{"b", "c"})

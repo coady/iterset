@@ -179,12 +179,6 @@ func ExampleMapSet_IsSuperset() {
 	// Output: true false
 }
 
-func ExampleMapSet_IsDisjoint() {
-	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(Set("c").IsDisjoint(k), Set("a").IsDisjoint(k))
-	// Output: true false
-}
-
 func ExampleIsDisjoint() {
 	k := slices.Values([]string{"a"})
 	s1 := []string{"b"}
