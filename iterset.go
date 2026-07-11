@@ -53,6 +53,27 @@ func (m MapSet[K, V]) equal(keys iter.Seq[K]) bool {
 	return superset && len(m) == len(s)
 }
 
+func (m MapSet[K, V]) filter(f func(K) bool) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for key, value := range m {
+			if f(key) && !yield(key, value) {
+				return
+			}
+		}
+	}
+}
+
+func (m MapSet[K, V]) mask(keys iter.Seq[K]) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for key := range keys {
+			value, ok := m[key]
+			if ok && !yield(key, value) {
+				return
+			}
+		}
+	}
+}
+
 // Contains returns whether the key is present.
 //
 // Related:
@@ -169,48 +190,6 @@ func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
 		maps.Insert(m, seq)
 	}
 	return m
-}
-
-// Intersect returns the ordered key-value pairs which are present in both.
-//
-// Performance:
-//   - time: O(k)
-func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
-	if len(m) == 0 {
-		return maps.All(m)
-	}
-	return func(yield func(K, V) bool) {
-		for key := range keys {
-			value, ok := m[key]
-			if ok && !yield(key, value) {
-				return
-			}
-		}
-	}
-}
-
-// Difference returns the key-value pairs which are not present in the keys.
-//
-// Related:
-//   - [MapSet.Remove] to modify in-place
-//   - [MapSet.ReverseDifference] if the keys were a map
-//   - [Difference] if the receiver was not a map
-//
-// Performance:
-//   - time:  O(m+k)
-//   - space: O(min(m,k))
-func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
-	s := m.intersect(keys)
-	if len(m) == len(s) {
-		return func(func(K, V) bool) {}
-	}
-	return func(yield func(K, V) bool) {
-		for key, value := range m {
-			if s.Missing(key) && !yield(key, value) {
-				return
-			}
-		}
-	}
 }
 
 // ReverseDifference returns the ordered keys which are not present in the map.

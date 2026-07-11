@@ -55,3 +55,48 @@ func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 	}
 	return len(m) == len(m.intersect(it))
 }
+
+// Intersect returns the ordered key-value pairs which are present in both.
+//
+// Performance:
+//   - time: O(k)
+func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
+	if len(m) == 0 {
+		return maps.All(m)
+	}
+	var it iter.Seq[K]
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		it = keys
+	case MapSet[K, V]:
+		if len(m) < len(keys) {
+			return m.filter(keys.Contains)
+		}
+		it = maps.Keys(keys)
+	}
+	return m.mask(it)
+}
+
+// Difference returns the key-value pairs which are not present in the keys.
+//
+// Related:
+//   - [MapSet.Remove] to modify in-place
+//   - [Difference] if the receiver was not a map
+//
+// Performance:
+//   - time:  O(m+k)
+//   - space: O(min(m,k))
+func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
+	var missing func(K) bool
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		s := m.intersect(keys)
+		if len(m) == len(s) {
+			return func(func(K, V) bool) {}
+		}
+		missing = s.Missing
+	case MapSet[K, V]:
+		missing = keys.Missing
+	}
+	return m.filter(missing)
+}

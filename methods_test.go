@@ -4,6 +4,7 @@ package iterset
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 )
 
@@ -23,4 +24,28 @@ func ExampleMapSet_IsSubset() {
 	// Output:
 	// true false
 	// true false
+}
+
+func ExampleMapSet_Intersect() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	s := slices.Values([]string{"b", "c", "d"})
+	for key, value := range m.Intersect(s) {
+		fmt.Println(key, value)
+	}
+	fmt.Println(maps.Collect(m.Intersect(Count(s))))
+	fmt.Println(maps.Collect(Count(s).Intersect(m)))
+	// Output:
+	// b 1
+	// map[b:1]
+	// map[b:1]
+}
+
+func ExampleMapSet_Difference() {
+	s := Set("a", "b")
+	k := []string{"b", "c"}
+	fmt.Println(maps.Collect(s.Difference(slices.Values(k))))
+	fmt.Println(maps.Collect(s.Difference(Set(k...))))
+	// Output:
+	// map[a:{}]
+	// map[a:{}]
 }

@@ -79,7 +79,7 @@ func TestEmpty(t *testing.T) {
 	if m.Union() == nil {
 		t.Error("should not be nil")
 	}
-	for range m.Intersect(nil) {
+	for range m.Intersect(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
 	for range Intersect(maps.Keys(m), maps.Keys(m)) {

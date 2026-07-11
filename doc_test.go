@@ -235,15 +235,6 @@ func ExampleMapSet_Union() {
 	// Output: map[a:0 b:2 c:3]
 }
 
-func ExampleMapSet_Intersect() {
-	m := MapSet[string, int]{"a": 0, "b": 1}
-	s := slices.Values([]string{"b", "c"})
-	for key, value := range m.Intersect(s) {
-		fmt.Println(key, value)
-	}
-	// Output: b 1
-}
-
 func ExampleIntersect() {
 	s1 := slices.Values([]string{"a", "b", "d", "b"})
 	s2 := []string{"a", "a", "b", "b", "c"}
@@ -252,12 +243,6 @@ func ExampleIntersect() {
 	// Output:
 	// [a b b]
 	// [a b b]
-}
-
-func ExampleMapSet_Difference() {
-	k := slices.Values([]string{"b", "c"})
-	fmt.Println(maps.Collect(Set("a", "b").Difference(k)))
-	// Output: map[a:{}]
 }
 
 func ExampleDifference() {
