@@ -14,8 +14,9 @@ import (
 //   - [maps.Equal] to compare values
 //
 // Performance:
-//   - time: O(k)
-//   - space: O(min(m, k))
+//   - time: O(k) if seq or slice
+//   - time: O(min(m, k)) if map
+//   - space: O(min(m, k)) if seq or slice
 func (m MapSet[K, V]) Equal[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
@@ -38,8 +39,9 @@ func (m MapSet[K, V]) Equal[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 //   - [IsSubset] if the receiver was not a map
 //
 // Performance:
-//   - time: O(k)
-//   - space: O(min(m, k))
+//   - time: O(k) if seq or slice
+//   - time: O(min(m, k)) if map
+//   - space: O(min(m, k)) if seq or slice
 func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
@@ -59,7 +61,8 @@ func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 // IsDisjoint returns whether no keys are present.
 //
 // Performance:
-//   - time: O(k)
+//   - time: O(k) if seq
+//   - time: O(min(m, k)) if map
 func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
@@ -77,7 +80,8 @@ func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 // Intersect returns the ordered key-value pairs which are present in both.
 //
 // Performance:
-//   - time: O(k)
+//   - time: O(k) if seq
+//   - time: O(min(m, k)) if map
 func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
@@ -99,8 +103,9 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 //   - [Difference] if the receiver was not a map
 //
 // Performance:
-//   - time:  O(m+k)
-//   - space: O(min(m,k))
+//   - time: O(m+k) if seq
+//   - time: O(m) if map
+//   - space: O(min(m,k)) if seq
 func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.Seq2[K, V]) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
