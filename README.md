@@ -74,7 +74,7 @@ Includes general sequence utilities which complement the set operations. These a
 Iterators avoid eager collection and preserve early exits. They are only [single-use](https://pkg.go.dev/iter#hdr-Single_Use_Iterators) if their input was.
 
 ## Installation
-No dependencies. [Go >=1.23](https://go.dev/doc/go1.23) required.
+No dependencies. Go >=1.25 required; at least the past two Go releases supported.
 
 ```console
 go get github.com/coady/iterset
@@ -85,5 +85,5 @@ go get github.com/coady/iterset
 
 ```console
 go test -cover
-go test -bench=.  # Go >=1.24
+go test -bench=.
 ```
