@@ -12,6 +12,7 @@ import (
 //
 // Related:
 //   - [maps.Equal] to compare values
+//   - [maps.EqualFunc] for two maps with different value types
 //
 // Performance:
 //   - time: O(k) if seq or slice
@@ -36,6 +37,7 @@ func (m MapSet[K, V]) Equal[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 // IsSubset returns whether every map key is present in keys.
 //
 // Related:
+//   - [MapSet.IsSuperset] with [maps.Keys] for maps with different value types
 //   - [IsSubset] if the receiver was not a map
 //
 // Performance:
@@ -59,6 +61,7 @@ func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 }
 
 // IsDisjoint returns whether no keys are present.
+// Use [maps.Keys] on the smaller of maps with different value types.
 //
 // Performance:
 //   - time: O(k) if seq
@@ -78,6 +81,7 @@ func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 }
 
 // Intersect returns the ordered key-value pairs which are present in both.
+// Use [maps.Keys] on the smaller of maps with different value types.
 //
 // Performance:
 //   - time: O(k) if seq
@@ -100,6 +104,7 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 //
 // Related:
 //   - [MapSet.Remove] to modify in-place
+//   - [MapSet.ReverseDifference] with [maps.Keys] for maps with different value types
 //   - [Difference] if the receiver was not a map
 //
 // Performance:

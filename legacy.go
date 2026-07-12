@@ -10,6 +10,7 @@ import (
 //
 // Related:
 //   - [maps.Equal] to compare values
+//   - [maps.EqualFunc] for two maps
 //
 // Performance:
 //   - time: O(k)
@@ -32,6 +33,7 @@ func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
 }
 
 // IsDisjoint returns whether no keys are present.
+// Use [maps.Keys] on the smaller of two maps.
 //
 // Performance:
 //   - time: O(k)
@@ -40,6 +42,7 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 }
 
 // Intersect returns the ordered key-value pairs which are present in both.
+// Use [maps.Keys] on the smaller of two maps.
 //
 // Performance:
 //   - time: O(k)

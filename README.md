@@ -22,10 +22,6 @@ So `iterset` is built around generic maps with `any` value type. Inspired by [Py
 * Slice iterators retain ordering.
 * Iterators are lazily evaluated, inherently supporting early exits.
 
-As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits.
-* slices and maps may exit early based on size
-* maps may use an asymptotically better algorithm
-
 ## Usage
 ### Constructors
 There are constructors for all common use cases.
@@ -52,6 +48,10 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `Difference`
 * `ReverseDifference`
 * `SymmetricDifference`
+
+As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits.
+* slices and maps may exit early based on size
+* maps may use an asymptotically better algorithm
 
 ### Functions
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway. Slice parameters are also optimized where possible.
