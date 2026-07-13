@@ -49,9 +49,12 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `ReverseDifference`
 * `SymmetricDifference`
 
-As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits.
-* slices and maps may exit early based on size
-* maps may use an asymptotically better algorithm
+As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits. Slices and maps may exit early based on size; maps may use an asymptotically better algorithm.
+* `Equal`
+* `IsSubset`
+* `IsDisjoint`
+* `Intersect{Count}`
+* `Difference`
 
 ### Functions
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway. Slice parameters are also optimized where possible.

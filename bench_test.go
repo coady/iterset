@@ -192,6 +192,21 @@ func BenchmarkMapSet_SymmetricDifference(b *testing.B) {
 	}
 }
 
+func BenchmarkMapSet_Overlap(b *testing.B) {
+	s, k := setup(b)
+	for b.Loop() {
+		s.Overlap(k)
+	}
+}
+
+func BenchmarkMapSet_IntersectCount(b *testing.B) {
+	s, k := setup(b)
+	m := Collect(k, struct{}{})
+	for b.Loop() {
+		s.IntersectCount(m)
+	}
+}
+
 func BenchmarkUnique(b *testing.B) {
 	_, k := setup(b)
 	for b.Loop() {
