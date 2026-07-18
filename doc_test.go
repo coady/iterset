@@ -311,7 +311,8 @@ func ExampleCompact() {
 }
 
 func ExampleCompactBy() {
-	for key, values := range CompactBy([]string{"B", "b", "A", "a", "b"}, strings.ToLower) {
+	k := slices.Values([]string{"B", "b", "A", "a", "b"})
+	for key, values := range CompactBy(k, strings.ToLower) {
 		fmt.Println(key, values)
 	}
 	// Output:

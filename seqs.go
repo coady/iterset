@@ -145,9 +145,9 @@ func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 //   - space: O(k)
 func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	m := sized[K, int, K](seq)
-	switch it := any(seq).(type) {
+	switch seq := any(seq).(type) {
 	case iter.Seq[K]:
-		for key, source := range zip(keys, it) {
+		for key, source := range zip(keys, seq) {
 			if source.empty {
 				return false
 			}
@@ -161,14 +161,14 @@ func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) boo
 		for key := range keys {
 			m[key] += 1
 			count += 1
-			if count > len(it) {
+			if count > len(seq) {
 				return false
 			}
 		}
-		if count < len(it) {
+		if count < len(seq) {
 			return false
 		}
-		for _, key := range it {
+		for _, key := range seq {
 			m[key] -= 1
 			if m[key] < 0 {
 				return false
@@ -311,11 +311,11 @@ func Compact[K comparable](keys iter.Seq[K]) iter.Seq2[K, int] {
 // Related:
 //   - [UniqueBy] to ignore adjacency
 //   - [GroupBy] to return a map
-func CompactBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K) iter.Seq2[K, []V] {
+func CompactBy[K comparable, V any](values iter.Seq[V], key func(V) K) iter.Seq2[K, []V] {
 	return func(yield func(K, []V) bool) {
 		var current K
 		var group []V
-		for value := range sequence[V](values) {
+		for value := range values {
 			k := key(value)
 			if group != nil && k != current {
 				if !yield(current, group) {
