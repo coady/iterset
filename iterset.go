@@ -101,6 +101,18 @@ func (m MapSet[K, V]) mask(keys iter.Seq[K]) iter.Seq2[K, V] {
 	}
 }
 
+func keep[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
+	if len(keys) == 0 {
+		clear(m)
+	} else {
+		for key := range m {
+			if keys.Missing(key) {
+				delete(m, key)
+			}
+		}
+	}
+}
+
 // Contains returns whether the key is present.
 //
 // Related:

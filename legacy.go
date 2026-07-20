@@ -41,8 +41,27 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 	return len(m) == 0 || allFunc(keys, m.Missing)
 }
 
+// Keep only the keys present in both.
+// Also known as intersection update.
+//
+// Related:
+//   - [MapSet.Intersect] to not modify in-place
+//
+// Performance:
+//   - time: O(m+k)
+//   - space: O(min(m, k))
+func (m MapSet[K, V]) Keep(keys iter.Seq[K]) {
+	s := m.intersect(keys)
+	if len(s) < len(m) {
+		keep(m, s)
+	}
+}
+
 // Intersect returns the ordered key-value pairs which are present in both.
 // Use [maps.Keys] on the smaller of two maps.
+//
+// Related:
+//   - [MapSet.Keep] to modify in-place
 //
 // Performance:
 //   - time: O(k)

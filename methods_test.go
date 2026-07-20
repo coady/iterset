@@ -32,6 +32,17 @@ func ExampleMapSet_IsDisjoint() {
 	// Output: true false
 }
 
+func ExampleMapSet_Keep() {
+	s := Set("a", "b", "c")
+	s.Keep(slices.Values([]string{"b", "c", "d"}))
+	fmt.Println(s)
+	s.Keep(Set("a"))
+	fmt.Println(s)
+	// Output:
+	// map[b:{} c:{}]
+	// map[]
+}
+
 func ExampleMapSet_Intersect() {
 	m := MapSet[string, int]{"a": 0, "b": 1}
 	s := slices.Values([]string{"b", "c", "d"})
