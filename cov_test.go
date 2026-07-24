@@ -96,7 +96,9 @@ func TestEmpty(t *testing.T) {
 	}
 	m.Delete("")
 	m.Remove(slices.Values([]string{""}))
-	Set("").Keep(slices.Values([]string{}))
+	k := slices.Values([]string{})
+	Set("").Keep(k)
+	m.IntersectCount(k)
 }
 
 func assertMulti[K any](t *testing.T, seq iter.Seq[K]) {

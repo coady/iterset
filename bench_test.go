@@ -201,9 +201,8 @@ func BenchmarkMapSet_Overlap(b *testing.B) {
 
 func BenchmarkMapSet_IntersectCount(b *testing.B) {
 	s, k := setup(b)
-	m := Collect(k, struct{}{})
 	for b.Loop() {
-		s.IntersectCount(m)
+		s.IntersectCount(k)
 	}
 }
 

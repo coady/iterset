@@ -267,12 +267,6 @@ func ExampleMapSet_Overlap() {
 	// Output: 1 2 1
 }
 
-func ExampleMapSet_IntersectCount() {
-	s, k := Set("a", "b"), Set("b", "c", "d")
-	fmt.Println(s.IntersectCount(k))
-	// Output: 1
-}
-
 func ExampleCast() {
 	m := map[string]bool{}
 	Cast(m).Add("a")

@@ -57,6 +57,12 @@ func ExampleMapSet_Intersect() {
 	// map[b:1]
 }
 
+func ExampleMapSet_IntersectCount() {
+	s, k := Set("a", "b"), []string{"b", "c", "d"}
+	fmt.Println(s.IntersectCount(slices.Values(k)), s.IntersectCount(Set(k...)))
+	// Output: 1 1
+}
+
 func ExampleMapSet_Difference() {
 	s := Set("a", "b")
 	k := []string{"b", "c"}

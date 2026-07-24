@@ -44,9 +44,9 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	return s
 }
 
-func intersectCount[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) int {
-	if len(m) < len(keys) {
-		return intersectCount(keys, m)
+func (m MapSet[K, V]) intersectCount(keys iter.Seq[K]) int {
+	if len(m) == 0 {
+		return 0
 	}
 	count := 0
 	for key := range keys {
@@ -277,7 +277,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 //   - Jaccard index: both / (left + both + right)
 //
 // Related:
-//   - [MapSet.IntersectCount] if the sequence was a map
+//   - [MapSet.IntersectCount] for just the intersection size
 //
 // Performance:
 //   - time: Θ(k)

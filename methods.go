@@ -125,13 +125,28 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 	return m.mask(it)
 }
 
-// IntersectCount returns the number of keys present in both maps.
-// Faster than size of [MapSet.Intersect] and [MapSet.Overlap].
+// IntersectCount returns the number of keys present in both.
+// Use [maps.Keys] on the smaller of maps with different value types.
+// Sequences count duplicate keys.
+//
+// Related:
+//   - [MapSet.Overlap] for distinct count from a sequence
 //
 // Performance:
-//   - time: O(min(m, k))
-func (m MapSet[K, V]) IntersectCount[V2 any](keys MapSet[K, V2]) int {
-	return intersectCount(m, keys)
+//   - time: O(k) if seq
+//   - time: O(min(m, k)) if map
+func (m MapSet[K, V]) IntersectCount[S iter.Seq[K] | MapSet[K, V]](keys S) int {
+	var it iter.Seq[K]
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		it = keys
+	case MapSet[K, V]:
+		it = maps.Keys(keys)
+		if len(m) < len(keys) {
+			m, it = keys, maps.Keys(m)
+		}
+	}
+	return m.intersectCount(it)
 }
 
 // Difference returns the key-value pairs which are not present in the keys.
