@@ -124,8 +124,9 @@ func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	for key, source := range zip(keys, seq) {
 		if !source.empty {
 			sets[source.index].add(key)
-		} else if sets[1-source.index].pop(key) {
-			delete(sets[source.index], key)
+		} else if sets[1-source.index].Contains(key) {
+			delete(sets[0], key)
+			delete(sets[1], key)
 			sets[2].add(key)
 		} else if sets[2].Missing(key) {
 			return false

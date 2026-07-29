@@ -25,12 +25,6 @@ func (m MapSet[K, V]) add(key K) {
 	m[key] = value
 }
 
-func (m MapSet[K, V]) pop(key K) bool {
-	_, ok := m[key]
-	delete(m, key)
-	return ok
-}
-
 func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	s := Set[K]()
 	for key := range keys {
