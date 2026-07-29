@@ -12,6 +12,7 @@ import (
 func Example_difference() {
 	values := []string{"A", "B", "C"}
 	keys := []string{"d", "c", "b"}
+
 	// With no sets.
 	m := map[string]bool{}
 	for _, value := range values {
@@ -19,6 +20,7 @@ func Example_difference() {
 	}
 	keys = slices.DeleteFunc(keys, func(key string) bool { return m[key] })
 	fmt.Println(keys)
+
 	// A typical `mapset` would have minimal impact on readability.
 	s := Set[string]()
 	for _, value := range values {
@@ -26,6 +28,7 @@ func Example_difference() {
 	}
 	keys = slices.DeleteFunc(keys, s.Contains)
 	fmt.Println(keys)
+
 	// Whereas `iterset` can in-line the set construction.
 	v := IndexBy(values, strings.ToLower)
 	keys = slices.DeleteFunc(keys, v.Contains)
@@ -40,6 +43,7 @@ func Example_difference() {
 func Example_intersect() {
 	data := map[string]int{"a": 0, "b": 1, "c": 2}
 	keys := []string{"d", "c", "b"}
+
 	// With no sets.
 	for _, key := range keys {
 		value, ok := data[key]
@@ -47,6 +51,7 @@ func Example_intersect() {
 			fmt.Println(key, value)
 		}
 	}
+
 	// A typical `mapset` would copy `data`, and have no impact on readability.
 	s := Set(slices.Collect(maps.Keys(data))...)
 	for _, key := range keys {
@@ -54,6 +59,7 @@ func Example_intersect() {
 			fmt.Println(key, data[key])
 		}
 	}
+
 	// Using an intersect method would also copy `keys`, and lose ordering.
 	// Whereas `iterset` methods have in-lined logic with zero copying and lazy iteration.
 	for key, value := range Cast(data).Intersect(slices.Values(keys)) {
@@ -71,6 +77,7 @@ func Example_intersect() {
 // Is one slice a superset of another?
 func Example_superset() {
 	left, right := []string{"a", "b", "c"}, []string{"b", "c", "d"}
+
 	// With no sets.
 	m := map[string]bool{}
 	for _, c := range left {
@@ -86,10 +93,12 @@ func Example_superset() {
 	fmt.Println(isSuperset)
 	// Or in functional style.
 	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !m[c] }))
+
 	// A typical `mapset` would copy both slices, which makes early exits irrelevant.
 	// Or it only solves half the problem.
 	s := Set(left...)
 	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !s.Contains(c) }))
+
 	// Whereas `iterset` methods have in-lined logic with minimal copying and early exits.
 	fmt.Println(Set(left...).IsSuperset(slices.Values(right)))
 	// Output:
@@ -102,6 +111,7 @@ func Example_superset() {
 // Remove duplicates, retaining original order.
 func Example_unique() {
 	values := []string{"a", "b", "a"}
+
 	// With no sets.
 	m := map[string]bool{}
 	keys := []string{}
@@ -112,11 +122,13 @@ func Example_unique() {
 		m[c] = true
 	}
 	fmt.Println(keys)
+
 	// A typical `mapset` would either have no impact on readability, or lose ordering.
 	// Whereas `iterset` has this built-in with lazy iteration.
 	for c := range Unique(slices.Values(values)) {
 		fmt.Println(c)
 	}
+
 	// What if a `set` is still needed, in addition to ordering.
 	idx := Index(slices.Values(values))
 	fmt.Println(idx)

@@ -22,6 +22,15 @@ So `iterset` is built around generic maps with `any` value type. Inspired by [Py
 * Slice iterators retain ordering.
 * Iterators are lazily evaluated, inherently supporting early exits.
 
+## Roadmap
+The Go Collections working group is proposing standard set APIs:
+* [container/set](https://github.com/golang/go/issues/69230) — `map[E]struct{}` set type
+* [container/mapset](https://github.com/golang/go/issues/77052) — helpers for `map[K]struct{}` / `map[K]bool`
+
+When those are accepted and stable, `iterset` plans to mirror the standard where compatible, while keeping its core features:
+* `map[K]V` with any value type (no copy)
+* `iter.Seq` as first-class input to set algebra (lazy evaluation)
+
 ## Usage
 ### Constructors
 There are constructors for all common use cases.
