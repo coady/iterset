@@ -149,8 +149,8 @@ func ExampleMapSet_Contains() {
 
 func ExampleMapSet_Missing() {
 	s := Set("b", "a", "b")
-	fmt.Println(s.Missing("a"), s.Missing("c"))
-	// Output: false true
+	fmt.Println(slices.DeleteFunc([]string{"a", "c"}, s.Missing))
+	// Output: [a]
 }
 
 func ExampleEqual() {

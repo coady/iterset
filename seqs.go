@@ -57,10 +57,10 @@ func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K
 		defer stop()
 		k, ok := next()
 		for key := range keys {
-			for ; ok && s.Missing(key); k, ok = next() {
+			for ; ok && !s.Contains(key); k, ok = next() {
 				s.add(k)
 			}
-			if s.Missing(key) && !yield(key) {
+			if !s.Contains(key) && !yield(key) {
 				return
 			}
 		}
@@ -128,7 +128,7 @@ func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 			delete(sets[0], key)
 			delete(sets[1], key)
 			sets[2].add(key)
-		} else if sets[2].Missing(key) {
+		} else if !sets[2].Contains(key) {
 			return false
 		}
 	}
@@ -251,7 +251,7 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		s := Set[K]()
 		for key := range keys {
-			if s.Missing(key) && !yield(key) {
+			if !s.Contains(key) && !yield(key) {
 				return
 			}
 			s.add(key)
@@ -274,7 +274,7 @@ func UniqueBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K)
 		s := sized[K, struct{}, V](values)
 		for value := range sequence[V](values) {
 			k := key(value)
-			if s.Missing(k) && !yield(k, value) {
+			if !s.Contains(k) && !yield(k, value) {
 				return
 			}
 			s.add(k)

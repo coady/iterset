@@ -100,7 +100,7 @@ func keep[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
 		clear(m)
 	} else {
 		for key := range m {
-			if keys.Missing(key) {
+			if !keys.Contains(key) {
 				delete(m, key)
 			}
 		}
@@ -116,8 +116,8 @@ func (m MapSet[K, V]) Contains(key K) bool {
 	return ok
 }
 
-// Missing returns whether the key is not present.
-// Negation of [MapSet.Contains]; useful to pass as a bound method.
+// Missing returns whether the key is not present. ![MapSet.Contains] is preferred;
+// Missing exists to pass as a function value, e.g. to [slices.DeleteFunc].
 //
 // Related:
 //   - [MapSet.IsDisjoint] for multiple keys
@@ -256,7 +256,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 			return
 		}
 		for key := range m {
-			if s.Missing(key) && !yield(key) {
+			if !s.Contains(key) && !yield(key) {
 				return
 			}
 		}
@@ -327,7 +327,7 @@ func Index[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 	m := MapSet[K, int]{}
 	i := 0
 	for key := range keys {
-		if m.Missing(key) {
+		if !m.Contains(key) {
 			m[key] = i
 		}
 		i += 1
@@ -407,7 +407,7 @@ func Reduce[K comparable, V any](seq iter.Seq2[K, V], f func(V, V) V) MapSet[K, 
 func Memoize[K comparable, V any, S iter.Seq[K] | []K](keys S, f func(K) V) MapSet[K, V] {
 	m := sized[K, V, K](keys)
 	for key := range sequence[K](keys) {
-		if m.Missing(key) {
+		if !m.Contains(key) {
 			m[key] = f(key)
 		}
 	}
