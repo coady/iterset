@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+	"testing"
 )
 
 func ExampleMapSet_Equal() {
@@ -71,4 +72,46 @@ func ExampleMapSet_Difference() {
 	// Output:
 	// map[a:{}]
 	// map[a:{}] map[a:{} b:{}]
+}
+
+func ExampleMapSet_Remove() {
+	s := Set("a", "b", "c")
+	s.Remove(slices.Values([]string{"c", "d"}))
+	fmt.Println(s)
+	s.Remove(Set("a", "x"))
+	fmt.Println(s)
+	// Output:
+	// map[a:{} b:{}]
+	// map[b:{}]
+}
+
+func TestRemovet(t *testing.T) {
+	Set("a").Remove(Set("a", "b"))
+}
+
+func ExampleMapSet_SymmetricDifference() {
+	k := []string{"b", "c"}
+	fmt.Println(slices.Collect(Set("a", "b").SymmetricDifference(slices.Values(k))))
+	fmt.Println(Set("a").Equal(Set("b").SymmetricDifference(Set("a", "b"))))
+	// Output:
+	// [c a]
+	// true
+}
+
+func TestSymmetricDifference(t *testing.T) {
+	for range Set("a", "b").SymmetricDifference(Set("c")) {
+		break
+	}
+	for range Set("a").SymmetricDifference(Set("a", "b")) {
+		break
+	}
+}
+
+func ExampleMapSet_Overlap() {
+	s, k := Set("a", "b", "c"), []string{"b", "c", "d"}
+	fmt.Println(s.Overlap(slices.Values(k)))
+	fmt.Println(s.Overlap(Set(k...)))
+	// Output:
+	// 1 2 1
+	// 1 2 1
 }

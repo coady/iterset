@@ -64,6 +64,9 @@ As of Go 1.27, generic methods support iterators, slices, and maps if there are 
 * `IsDisjoint`
 * `Intersect{Count}`
 * `Difference`
+* `Remove`
+* `SymmetricDifference`
+* `Overlap`
 
 ### Functions
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway. Slice parameters are also optimized where possible.

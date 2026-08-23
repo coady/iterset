@@ -93,3 +93,40 @@ func (m MapSet[K, V]) IntersectCount(keys iter.Seq[K]) int {
 func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return m.difference(keys)
 }
+
+// Remove keys.
+//
+// Related:
+//   - [MapSet.Difference] to not modify in-place
+func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
+	m.remove(keys)
+}
+
+// SymmetricDifference returns keys which are not in both.
+//
+// Related:
+//   - [MapSet.Toggle] to modify in-place
+//
+// Performance:
+//   - time: O(m+k)
+//   - space: O(min(m, k))
+func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
+	return m.symmetricDifference(keys)
+}
+
+// Overlap returns the sizes of the intersection and differences:
+// left only, both, right only.
+//
+// Similarity measures:
+//   - overlap coefficient: both / (min(left, right) + both)
+//   - Jaccard index: both / (left + both + right)
+//
+// Related:
+//   - [MapSet.IntersectCount] for just the intersection size
+//
+// Performance:
+//   - time: Θ(k)
+//   - space: Θ(k)
+func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
+	return m.overlap(keys)
+}

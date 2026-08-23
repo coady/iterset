@@ -99,11 +99,7 @@ func keep[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
 	if len(keys) == 0 {
 		clear(m)
 	} else {
-		for key := range m {
-			if !keys.Contains(key) {
-				delete(m, key)
-			}
-		}
+		maps.DeleteFunc(m, func(key K, _ V1) bool { return !keys.Contains(key) })
 	}
 }
 
@@ -169,11 +165,7 @@ func (m MapSet[K, V]) Delete(keys ...K) {
 	}
 }
 
-// Remove keys.
-//
-// Related:
-//   - [MapSet.Difference] to not modify in-place
-func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
+func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
 	for key := range keys {
 		delete(m, key)
 		if len(m) == 0 {
@@ -231,15 +223,7 @@ func (m MapSet[K, V]) ReverseDifference(keys iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
-// SymmetricDifference returns keys which are not in both.
-//
-// Related:
-//   - [MapSet.Toggle] to modify in-place
-//
-// Performance:
-//   - time: O(m+k)
-//   - space: O(min(m, k))
-func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
+func (m MapSet[K, V]) symmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	if len(m) == 0 {
 		return keys
 	}
@@ -263,20 +247,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	}
 }
 
-// Overlap returns the sizes of the intersection and differences:
-// left only, both, right only.
-//
-// Similarity measures:
-//   - overlap coefficient: both / (min(left, right) + both)
-//   - Jaccard index: both / (left + both + right)
-//
-// Related:
-//   - [MapSet.IntersectCount] for just the intersection size
-//
-// Performance:
-//   - time: Θ(k)
-//   - space: Θ(k)
-func (m MapSet[K, V]) Overlap(keys iter.Seq[K]) (int, int, int) {
+func (m MapSet[K, V]) overlap(keys iter.Seq[K]) (int, int, int) {
 	inter, diff := Set[K](), Set[K]()
 	for key := range keys {
 		if m.Contains(key) {

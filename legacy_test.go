@@ -53,3 +53,22 @@ func ExampleMapSet_Difference() {
 	fmt.Println(maps.Collect(Set("a", "b").Difference(k)))
 	// Output: map[a:{}]
 }
+
+func ExampleMapSet_Remove() {
+	s := Set("a", "b")
+	s.Remove(slices.Values([]string{"b", "c"}))
+	fmt.Println(s)
+	// Output: map[a:{}]
+}
+
+func ExampleMapSet_SymmetricDifference() {
+	k := slices.Values([]string{"b", "c"})
+	fmt.Println(slices.Collect(Set("a", "b").SymmetricDifference(k)))
+	// Output: [c a]
+}
+
+func ExampleMapSet_Overlap() {
+	s, k := Set("a", "b", "c"), []string{"b", "c", "d"}
+	fmt.Println(s.Overlap(slices.Values(k)))
+	// Output: 1 2 1
+}

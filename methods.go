@@ -172,3 +172,86 @@ func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.
 	}
 	return it
 }
+
+// Remove keys.
+// Use [maps.Keys] on the smaller of maps with different value types.
+//
+// Related:
+//   - [MapSet.Difference] to not modify in-place
+//
+// Performance:
+//   - time: O(k) if seq
+//   - time: O(min(m, k)) if map
+func (m MapSet[K, V]) Remove[S iter.Seq[K] | MapSet[K, V]](keys S) {
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		m.remove(keys)
+	case MapSet[K, V]:
+		if len(m) < len(keys) {
+			maps.DeleteFunc(m, func(key K, _ V) bool { return keys.Contains(key) })
+		} else {
+			m.remove(maps.Keys(keys))
+		}
+	}
+}
+
+// SymmetricDifference returns keys which are not in both.
+// Use [maps.Keys] for maps with different value types.
+//
+// Related:
+//   - [MapSet.Toggle] to modify in-place
+//
+// Performance:
+//   - time: O(m+k)
+//   - space: O(min(m, k)) if seq
+func (m MapSet[K, V]) SymmetricDifference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.Seq[K]) {
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		it = m.symmetricDifference(keys)
+	case MapSet[K, V]:
+		it = func(yield func(K) bool) {
+			both := 0
+			for key := range m {
+				if keys.Contains(key) {
+					both += 1
+				} else if !yield(key) {
+					return
+				}
+			}
+			if both < len(keys) {
+				for key := range keys {
+					if !m.Contains(key) && !yield(key) {
+						return
+					}
+				}
+			}
+		}
+	}
+	return it
+}
+
+// Overlap returns the sizes of the intersection and differences:
+// left only, both, right only.
+// Use [maps.Keys] on the smaller of maps with different value types.
+//
+// Similarity measures:
+//   - overlap coefficient: both / (min(left, right) + both)
+//   - Jaccard index: both / (left + both + right)
+//
+// Related:
+//   - [MapSet.IntersectCount] for just the intersection size
+//
+// Performance:
+//   - time: Θ(k) if seq
+//   - time: O(min(m, k)) if map
+//   - space: Θ(k) if seq
+func (m MapSet[K, V]) Overlap[S iter.Seq[K] | MapSet[K, V]](keys S) (left, both, right int) {
+	switch keys := any(keys).(type) {
+	case iter.Seq[K]:
+		left, both, right = m.overlap(keys)
+	case MapSet[K, V]:
+		both = m.IntersectCount(keys)
+		left, right = len(m)-both, len(keys)-both
+	}
+	return left, both, right
+}
