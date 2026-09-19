@@ -124,6 +124,8 @@ func Equal[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	for key, source := range zip(keys, seq) {
 		if !source.empty {
 			sets[source.index].add(key)
+		} else if len(sets[source.index]) > len(sets[1-source.index]) {
+			return false
 		} else if sets[1-source.index].Contains(key) {
 			delete(sets[0], key)
 			delete(sets[1], key)
@@ -157,6 +159,7 @@ func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) boo
 				delete(m, key)
 			}
 		}
+		return len(m) == 0
 	case []K:
 		count := 0
 		for key := range keys {
@@ -173,12 +176,10 @@ func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) boo
 			m[key] -= 1
 			if m[key] < 0 {
 				return false
-			} else if m[key] == 0 {
-				delete(m, key)
 			}
 		}
 	}
-	return len(m) == 0
+	return true
 }
 
 // IsSubset returns whether all keys are present in the sequence.

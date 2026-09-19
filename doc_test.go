@@ -167,12 +167,12 @@ func ExampleEqual() {
 func ExampleEqualCounts() {
 	k := slices.Values([]string{"b", "a", "b"})
 	fmt.Println(EqualCounts(k, k), EqualCounts(k, slices.Values([]string{})))
-	fmt.Println(EqualCounts(k, []string{}), EqualCounts(k, []string{"a", "a", "b"}))
-	fmt.Println(EqualCounts(k, []string{"a", "b", "b", "a"}))
+	fmt.Println(EqualCounts(k, []string{"a", "b", "b"}), EqualCounts(k, []string{"a", "a", "b"}))
+	fmt.Println(EqualCounts(k, []string{"a", "b", "b", "a"}), EqualCounts(k, []string{}))
 	// Output:
 	// true false
+	// true false
 	// false false
-	// false
 }
 
 func ExampleIsSubset() {
