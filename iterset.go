@@ -130,39 +130,42 @@ func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.Contains)
 }
 
-// Add key(s) with zero value.
+// Insert adds the key with a zero value if it is not already present.
+// It reports whether len(m) changed.
 //
 // Related:
-//   - [MapSet.Insert] for many keys
-func (m MapSet[K, V]) Add(keys ...K) {
-	var value V
-	for _, key := range keys {
-		m[key] = value
-	}
-}
-
-// Insert keys with default value.
-//
-// Related:
+//   - [Collect] to build a map from a sequence with a default value
 //   - [maps.Insert] for an iter.Seq2
-//   - [maps.Copy] for a map
-func (m MapSet[K, V]) Insert(keys iter.Seq[K], value V) {
-	for key := range keys {
-		m[key] = value
+func (m MapSet[K, V]) Insert(key K) bool {
+	if m.Contains(key) {
+		return false
 	}
+	var value V
+	m[key] = value
+	return true
 }
 
-// Delete key(s).
+// Delete removes the key.
+// It reports whether len(m) changed.
 //
 // Related:
 //   - [MapSet.Remove] for many keys
-func (m MapSet[K, V]) Delete(keys ...K) {
-	for _, key := range keys {
-		delete(m, key)
-		if len(m) == 0 {
-			return
-		}
-	}
+//   - [MapSet.DeleteFunc] for a predicate
+func (m MapSet[K, V]) Delete(key K) bool {
+	size := len(m)
+	delete(m, key)
+	return len(m) < size
+}
+
+// DeleteFunc deletes keys for which del returns true.
+// It reports whether len(m) changed.
+//
+// Related:
+//   - [maps.DeleteFunc] for a key-value predicate
+func (m MapSet[K, V]) DeleteFunc(del func(K) bool) bool {
+	size := len(m)
+	maps.DeleteFunc(m, func(key K, _ V) bool { return del(key) })
+	return len(m) < size
 }
 
 func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
@@ -275,7 +278,9 @@ func Cast[K comparable, V any](m map[K]V) MapSet[K, V] {
 //   - [maps.Collect] for an iter.Seq2
 func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 	m := MapSet[K, V]{}
-	m.Insert(keys, value)
+	for key := range keys {
+		m[key] = value
+	}
 	return m
 }
 
@@ -285,7 +290,9 @@ func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 //   - [Collect] for an iter.Seq
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 	s := make(MapSet[K, struct{}], len(keys))
-	s.Add(keys...)
+	for _, key := range keys {
+		s[key] = struct{}{}
+	}
 	return s
 }
 

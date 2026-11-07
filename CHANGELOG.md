@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 ### Changed
+* `Add` replaced by unary `Insert`
+* `Delete` is unary
 * `Remove`, `SymmetricDifference`, and `Overlap` accept maps in Go >=1.27
+
+### Added
+* `DeleteFunc`
 
 ## [0.6.0](https://github.com/coady/iterset/releases/tag/v0.6.0) - 2026-08-21
 ### Changed

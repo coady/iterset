@@ -15,7 +15,7 @@ func identity[V any](v V) V { return v }
 func setup(b *testing.B) (MapSet[int, struct{}], iter.Seq[int]) {
 	s := Set[int]()
 	for range size / 4 {
-		s.Add(rand.Intn(size))
+		s.Insert(rand.Intn(size))
 	}
 	k := make([]int, size/2)
 	for i := range k {

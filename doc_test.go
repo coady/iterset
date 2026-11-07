@@ -24,7 +24,7 @@ func Example_difference() {
 	// A typical `mapset` would have minimal impact on readability.
 	s := Set[string]()
 	for _, value := range values {
-		s.Add(strings.ToLower(value))
+		s.Insert(strings.ToLower(value))
 	}
 	keys = slices.DeleteFunc(keys, s.Contains)
 	fmt.Println(keys)
@@ -199,25 +199,22 @@ func ExampleIsDisjoint() {
 	// Output: true false false
 }
 
-func ExampleMapSet_Add() {
-	s := Set("a", "b")
-	s.Add("b", "c")
-	fmt.Println(len(s))
-	// Output: 3
-}
-
 func ExampleMapSet_Insert() {
-	m := MapSet[string, bool]{}
-	m.Insert(slices.Values([]string{"b", "a", "b"}), true)
-	fmt.Println(m)
-	// Output: map[a:true b:true]
+	s := Set("a", "b")
+	fmt.Println(s.Insert("b"), s.Insert("c"), len(s))
+	// Output: false true 3
 }
 
 func ExampleMapSet_Delete() {
 	s := Set("a", "b")
-	s.Delete("b", "c")
-	fmt.Println(len(s))
-	// Output: 1
+	fmt.Println(s.Delete("b"), s.Delete("c"), len(s))
+	// Output: true false 1
+}
+
+func ExampleMapSet_DeleteFunc() {
+	s := Set("a", "b", "c")
+	fmt.Println(s.DeleteFunc(func(k string) bool { return k > "a" }), len(s))
+	// Output: true 1
 }
 
 func ExampleMapSet_Toggle() {
@@ -262,12 +259,12 @@ func ExampleMapSet_ReverseDifference() {
 
 func ExampleCast() {
 	m := map[string]bool{}
-	Cast(m).Add("a")
+	Cast(m).Insert("a")
 	fmt.Println(m)
 	// equivalent to
 	type aSet = MapSet[string, bool]
-	aSet(m).Add("a")
-	aSet.Add(m, "a'")
+	aSet(m).Insert("a")
+	aSet.Insert(m, "a'")
 	// Output: map[a:false]
 }
 
