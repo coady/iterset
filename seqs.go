@@ -207,7 +207,7 @@ func Intersects[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool
 	return !IsEmpty(intersection(keys, seq))
 }
 
-// Intersection returns the ordered keys which are present in the sequence(s).
+// Intersection returns the ordered keys which are present in both sequences.
 // Duplicates are matched one-to-one.
 //
 // Related:
@@ -217,14 +217,11 @@ func Intersects[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
-	for _, seq := range seqs {
-		keys = intersection(keys, seq)
-	}
-	return keys
+func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
+	return intersection(keys, seq)
 }
 
-// Difference returns the ordered keys which are not present in the sequence(s).
+// Difference returns the ordered keys which are not present in the other sequence.
 //
 // Related:
 //   - [MapSet.ReverseDifference] if the sequence was a map
@@ -233,11 +230,8 @@ func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Difference[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
-	for _, seq := range seqs {
-		keys = difference(keys, seq)
-	}
-	return keys
+func Difference[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
+	return difference(keys, seq)
 }
 
 // Unique returns keys in order without duplicates.

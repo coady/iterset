@@ -232,9 +232,8 @@ func ExampleMapSet_SymmetricDifferenceWith() {
 }
 
 func ExampleMapSet_Union() {
-	m := map[string]int{"a": 0, "b": 1}
-	n := map[string]int{"b": 2, "c": 3}
-	fmt.Println(Cast(m).Union(maps.All(n)))
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	fmt.Println(m.Union(maps.All(map[string]int{"b": 2, "c": 3})))
 	// Output: map[a:0 b:2 c:3]
 }
 

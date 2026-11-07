@@ -95,7 +95,7 @@ func (m MapSet[K, V]) mask(keys iter.Seq[K]) iter.Seq2[K, V] {
 	}
 }
 
-func keep[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
+func intersectionWith[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
 	if len(keys) == 0 {
 		clear(m)
 	} else {
@@ -213,27 +213,6 @@ func (m MapSet[K, V]) SymmetricDifferenceWith(keys MapSet[K, V]) {
 			m[key] = value
 		}
 	}
-}
-
-// Union merges all keys with successive inserts.
-// Duplicate keys overwrite values.
-//
-// Related:
-//   - [MapSet.UnionWith] to modify in-place
-//   - [SortedUnion] for sorted sequences
-//
-// Performance:
-//   - time: Θ(m+k)
-//   - space: Ω(max(m, k))..O(m+k)
-func (m MapSet[K, V]) Union(seqs ...iter.Seq2[K, V]) MapSet[K, V] {
-	m = maps.Clone(m)
-	if m == nil {
-		m = map[K]V{}
-	}
-	for _, seq := range seqs {
-		maps.Insert(m, seq)
-	}
-	return m
 }
 
 // ReverseDifference returns the ordered keys which are not present in the map.

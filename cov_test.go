@@ -79,7 +79,7 @@ func TestExit(t *testing.T) {
 
 func TestEmpty(t *testing.T) {
 	var m MapSet[string, struct{}]
-	if m.Union() == nil {
+	if m.Union(maps.All(m)) == nil {
 		t.Error("should not be nil")
 	}
 	for range m.Intersection(maps.Keys(m)) {

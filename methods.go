@@ -95,10 +95,10 @@ func (m MapSet[K, V]) IntersectionWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	case iter.Seq[K]:
 		s := m.intersection(keys)
 		if len(s) < len(m) {
-			keep(m, s)
+			intersectionWith(m, s)
 		}
 	case MapSet[K, V]:
-		keep(m, keys)
+		intersectionWith(m, keys)
 	}
 }
 
@@ -228,6 +228,25 @@ func (m MapSet[K, V]) SymmetricDifference[S iter.Seq[K] | MapSet[K, V]](keys S) 
 		}
 	}
 	return it
+}
+
+// Union merges keys with inserts.
+// Duplicate keys overwrite values.
+//
+// Related:
+//   - [MapSet.UnionWith] to modify in-place
+//   - [SortedUnion] for sorted sequences
+//
+// Performance:
+//   - time: Θ(m+k)
+//   - space: Ω(max(m, k))..O(m+k)
+func (m MapSet[K, V]) Union[S iter.Seq2[K, V] | MapSet[K, V]](keys S) MapSet[K, V] {
+	m = maps.Clone(m)
+	if m == nil {
+		m = map[K]V{}
+	}
+	m.UnionWith(keys)
+	return m
 }
 
 // UnionWith merges keys with inserts.

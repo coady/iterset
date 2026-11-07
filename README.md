@@ -58,13 +58,13 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `SymmetricDifference{With}`
 * `Toggle`
 
-As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits. Slices and maps may exit early based on size; maps may use an asymptotically better algorithm.
+As of Go 1.27, generic methods support iterators, slices, and maps when that adds value: better performance, or compatibility with the standard set interface. Slices and maps may exit early based on size; maps may use an asymptotically better algorithm.
 * `Equal`
 * `SubsetOf`
 * `Intersects`
 * `Intersection{Count,With}`
 * `Difference{With}`
-* `UnionWith`
+* `Union{With}`
 * `Overlap`
 
 ### Functions
