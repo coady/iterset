@@ -75,54 +75,62 @@ func BenchmarkEqualCountsSlice(b *testing.B) {
 	}
 }
 
-func BenchmarkMapSet_IsSubset(b *testing.B) {
+func BenchmarkMapSet_ContainsAll(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		s.IsSubset(k)
+		s.ContainsAll(k)
 	}
 }
 
-func BenchmarkIsSubset(b *testing.B) {
+func BenchmarkMapSet_SubsetOf(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		IsSubset(maps.Keys(s), k)
+		s.SubsetOf(k)
 	}
 }
 
-func BenchmarkIsSubsetSlice(b *testing.B) {
+func BenchmarkSubsetOf(b *testing.B) {
+	s, k := setup(b)
+	for b.Loop() {
+		SubsetOf(maps.Keys(s), k)
+	}
+}
+
+func BenchmarkSubsetOfSlice(b *testing.B) {
 	s, k := setup(b)
 	slc := slices.Collect(k)
 	for b.Loop() {
-		IsSubset(maps.Keys(s), slc)
+		SubsetOf(maps.Keys(s), slc)
 	}
 }
 
-func BenchmarkMapSet_IsSuperset(b *testing.B) {
+func BenchmarkMapSet_SubsetOfMap(b *testing.B) {
+	s, k := setup(b)
+	other := Collect(k, struct{}{})
+	for b.Loop() {
+		s.SubsetOf(other)
+	}
+}
+
+func BenchmarkMapSet_Intersects(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		s.IsSuperset(k)
+		s.Intersects(k)
 	}
 }
 
-func BenchmarkMapSet_IsDisjoint(b *testing.B) {
+func BenchmarkIntersects(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		s.IsDisjoint(k)
+		Intersects(maps.Keys(s), k)
 	}
 }
 
-func BenchmarkIsDisjoint(b *testing.B) {
-	s, k := setup(b)
-	for b.Loop() {
-		IsDisjoint(maps.Keys(s), k)
-	}
-}
-
-func BenchmarkIsDisjointSlice(b *testing.B) {
+func BenchmarkIntersectsSlice(b *testing.B) {
 	s, k := setup(b)
 	slc := slices.Collect(k)
 	for b.Loop() {
-		IsDisjoint(maps.Keys(s), slc)
+		Intersects(maps.Keys(s), slc)
 	}
 }
 

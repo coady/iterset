@@ -14,16 +14,16 @@ func ExampleMapSet_Equal() {
 	// Output: true false
 }
 
-func ExampleMapSet_IsSubset() {
+func ExampleMapSet_SubsetOf() {
 	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(Set("a").IsSubset(k), Set("a", "c").IsSubset(k))
+	fmt.Println(Set("a").SubsetOf(k), Set("a", "c").SubsetOf(k))
 	// Output: true false
 }
 
-func ExampleMapSet_IsDisjoint() {
+func ExampleMapSet_Intersects() {
 	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(Set("c").IsDisjoint(k), Set("a").IsDisjoint(k))
-	// Output: true false
+	fmt.Println(Set("c").Intersects(k), Set("a").Intersects(k))
+	// Output: false true
 }
 
 func ExampleMapSet_IntersectionWith() {

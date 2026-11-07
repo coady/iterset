@@ -182,28 +182,29 @@ func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) boo
 	return true
 }
 
-// IsSubset returns whether all keys are present in the sequence.
+// SubsetOf returns whether all keys are present in the sequence.
 //
 // Related:
-//   - [MapSet.IsSuperset] if the sequence was a map
+//   - [MapSet.SubsetOf] if the keys were a map
+//   - [MapSet.ContainsAll] if the sequence was a map
 //
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsSubset[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
+func SubsetOf[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 	return IsEmpty(difference(keys, seq))
 }
 
-// IsDisjoint returns whether no keys are present in the sequence.
+// Intersects reports whether any key is present in the sequence.
 //
 // Related:
-//   - [MapSet.IsDisjoint] if the sequence was a map
+//   - [MapSet.Intersects] if the sequence was a map
 //
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func IsDisjoint[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
-	return IsEmpty(intersection(keys, seq))
+func Intersects[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
+	return !IsEmpty(intersection(keys, seq))
 }
 
 // Intersection returns the ordered keys which are present in the sequence(s).

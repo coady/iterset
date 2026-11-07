@@ -18,19 +18,19 @@ func ExampleMapSet_Equal() {
 	// false true
 }
 
-func ExampleMapSet_IsSubset() {
+func ExampleMapSet_SubsetOf() {
 	k := []string{"b", "a", "b"}
-	fmt.Println(Set("a").IsSubset(slices.Values(k)), Set("a", "c").IsSubset(k))
-	fmt.Println(Set("a").IsSubset(Set(k...)), Set("a").IsSubset([]string{}))
+	fmt.Println(Set("a").SubsetOf(slices.Values(k)), Set("a", "c").SubsetOf(k))
+	fmt.Println(Set("a").SubsetOf(Set(k...)), Set("a").SubsetOf([]string{}))
 	// Output:
 	// true false
 	// true false
 }
 
-func ExampleMapSet_IsDisjoint() {
+func ExampleMapSet_Intersects() {
 	k := []string{"b", "a", "b"}
-	fmt.Println(Set("c").IsDisjoint(slices.Values(k)), Set("a").IsDisjoint(Set(k...)))
-	// Output: true false
+	fmt.Println(Set("c").Intersects(slices.Values(k)), Set("a").Intersects(Set(k...)))
+	// Output: false true
 }
 
 func ExampleMapSet_IntersectionWith() {

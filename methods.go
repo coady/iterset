@@ -34,17 +34,17 @@ func (m MapSet[K, V]) Equal[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 	return m.equal(it)
 }
 
-// IsSubset returns whether every map key is present in keys.
+// SubsetOf returns whether every map key is present in keys.
 //
 // Related:
-//   - [MapSet.IsSuperset] with [maps.Keys] for maps with different value types
-//   - [IsSubset] if the receiver was not a map
+//   - [MapSet.ContainsAll] for the other polarity (better when the argument is a sequence)
+//   - [SubsetOf] if the receiver was not a map
 //
 // Performance:
 //   - time: O(k) if seq or slice
 //   - time: O(min(m, k)) if map
 //   - space: O(min(m, k)) if seq or slice
-func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
+func (m MapSet[K, V]) SubsetOf[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
@@ -55,18 +55,18 @@ func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 		}
 		it = slices.Values(keys)
 	case MapSet[K, V]:
-		return len(m) <= len(keys) && keys.IsSuperset(maps.Keys(m))
+		return len(m) <= len(keys) && keys.ContainsAll(maps.Keys(m))
 	}
 	return len(m) == len(m.intersection(it))
 }
 
-// IsDisjoint returns whether no keys are present.
+// Intersects reports whether any key is present.
 // Use [maps.Keys] on the smaller of maps with different value types.
 //
 // Performance:
 //   - time: O(k) if seq
 //   - time: O(min(m, k)) if map
-func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
+func (m MapSet[K, V]) Intersects[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
@@ -77,7 +77,7 @@ func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 			m, it = keys, maps.Keys(m)
 		}
 	}
-	return len(m) == 0 || allFunc(it, m.Missing)
+	return len(m) > 0 && !allFunc(it, m.Missing)
 }
 
 // IntersectionWith keeps only the keys present in both.

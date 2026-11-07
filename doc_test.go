@@ -74,8 +74,8 @@ func Example_intersection() {
 	// b 1
 }
 
-// Is one slice a superset of another?
-func Example_superset() {
+// Does one slice contain all elements of another?
+func Example_containsAll() {
 	left, right := []string{"a", "b", "c"}, []string{"b", "c", "d"}
 
 	// With no sets.
@@ -83,14 +83,14 @@ func Example_superset() {
 	for _, c := range left {
 		m[c] = true
 	}
-	isSuperset := true
+	containsAll := true
 	for _, c := range right {
 		if !m[c] {
-			isSuperset = false
+			containsAll = false
 			break
 		}
 	}
-	fmt.Println(isSuperset)
+	fmt.Println(containsAll)
 	// Or in functional style.
 	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !m[c] }))
 
@@ -100,7 +100,7 @@ func Example_superset() {
 	fmt.Println(!slices.ContainsFunc(right, func(c string) bool { return !s.Contains(c) }))
 
 	// Whereas `iterset` methods have in-lined logic with minimal copying and early exits.
-	fmt.Println(Set(left...).IsSuperset(slices.Values(right)))
+	fmt.Println(Set(left...).ContainsAll(slices.Values(right)))
 	// Output:
 	// false
 	// false
@@ -175,28 +175,28 @@ func ExampleEqualCounts() {
 	// false false
 }
 
-func ExampleIsSubset() {
+func ExampleSubsetOf() {
 	s1 := slices.Values([]string{"a"})
 	s2 := []string{"a", "b"}
-	fmt.Println(IsSubset(s1, s2), IsSubset(slices.Values(s2), s1))
-	fmt.Println(IsSubset(slices.Values(s2), slices.Collect(s1)))
+	fmt.Println(SubsetOf(s1, s2), SubsetOf(slices.Values(s2), s1))
+	fmt.Println(SubsetOf(slices.Values(s2), slices.Collect(s1)))
 	// Output:
 	// true false
 	// false
 }
 
-func ExampleMapSet_IsSuperset() {
+func ExampleMapSet_ContainsAll() {
 	k := slices.Values([]string{"b", "a", "b"})
-	fmt.Println(Set("a", "b").IsSuperset(k), Set("a").IsSuperset(k))
+	fmt.Println(Set("a", "b").ContainsAll(k), Set("a").ContainsAll(k))
 	// Output: true false
 }
 
-func ExampleIsDisjoint() {
+func ExampleIntersects() {
 	k := slices.Values([]string{"a"})
 	s1 := []string{"b"}
 	s2 := slices.Values([]string{"b", "a"})
-	fmt.Println(IsDisjoint(k, s1), IsDisjoint(k, s2), IsDisjoint(s2, s1))
-	// Output: true false false
+	fmt.Println(Intersects(k, s1), Intersects(k, s2), Intersects(s2, s1))
+	// Output: false true true
 }
 
 func ExampleMapSet_Insert() {

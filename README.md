@@ -23,11 +23,10 @@ So `iterset` is built around generic maps with `any` value type. Inspired by [Py
 * Iterators are lazily evaluated, inherently supporting early exits.
 
 ## Roadmap
-The Go Collections working group is proposing standard set APIs:
-* [container/set](https://github.com/golang/go/issues/69230) — `map[E]struct{}` set type
-* [container/mapset](https://github.com/golang/go/issues/77052) — helpers for `map[K]struct{}` / `map[K]bool`
+[golang.org/x/exp/collection/set](https://github.com/golang/go/issues/69230) is accepted (`map[E]struct{}`).
+[container/mapset](https://github.com/golang/go/issues/77052) is still a proposal.
 
-When those are accepted and stable, `iterset` plans to mirror the standard where compatible, while keeping its core features:
+`iterset` mirrors that vocabulary where compatible, while keeping:
 * `map[K]V` with any value type (no copy)
 * `iter.Seq` as first-class input to set algebra (lazy evaluation)
 
@@ -49,9 +48,9 @@ There are constructors for all common use cases.
 ### Methods
 Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Implementations are asymptotically optimal, and exit early where relevant.
 * `Equal`
-* `IsSubset`
-* `IsSuperset`
-* `IsDisjoint`
+* `ContainsAll`
+* `SubsetOf`
+* `Intersects`
 * `Union`
 * `Intersection{With}`
 * `Difference{With}`
@@ -61,8 +60,8 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 
 As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits. Slices and maps may exit early based on size; maps may use an asymptotically better algorithm.
 * `Equal`
-* `IsSubset`
-* `IsDisjoint`
+* `SubsetOf`
+* `Intersects`
 * `Intersection{Count,With}`
 * `Difference{With}`
 * `SymmetricDifference`
@@ -71,8 +70,8 @@ As of Go 1.27, generic methods support iterators, slices, and maps if there are 
 ### Functions
 Some operations are also functions, to avoid making unnecessary maps. Note there is a trade-off between early exits versus iteration overhead. If one sequence is expected to be smaller, it is often faster to collect it into a map anyway. Slice parameters are also optimized where possible.
 * `Equal{Counts}`
-* `IsSubset`
-* `IsDisjoint`
+* `SubsetOf`
+* `Intersects`
 * `Intersection`
 * `Difference`
 * `Sorted{Union,Intersection,Difference}`

@@ -65,7 +65,7 @@ func TestExit(t *testing.T) {
 	for c := range Index(k).SymmetricDifference(k) {
 		t.Errorf("should be empty: %s", c)
 	}
-	if IsSubset(slices.Values([]string{"b"}), k) {
+	if SubsetOf(slices.Values([]string{"b"}), k) {
 		t.Errorf("should be false")
 	}
 	for range Intersection(k, slices.Values([]string{})) {

@@ -106,7 +106,7 @@ func keep[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, V2]) {
 // Contains returns whether the key is present.
 //
 // Related:
-//   - [MapSet.IsSuperset] for multiple keys
+//   - [MapSet.ContainsAll] for multiple keys
 func (m MapSet[K, V]) Contains(key K) bool {
 	_, ok := m[key]
 	return ok
@@ -116,17 +116,20 @@ func (m MapSet[K, V]) Contains(key K) bool {
 // Missing exists to pass as a function value, e.g. to [slices.DeleteFunc].
 //
 // Related:
-//   - [MapSet.IsDisjoint] for multiple keys
+//   - [MapSet.Intersects] for multiple keys
 func (m MapSet[K, V]) Missing(key K) bool {
 	_, ok := m[key]
 	return !ok
 }
 
-// IsSuperset returns whether all keys are present.
+// ContainsAll returns whether all keys are present.
+//
+// Related:
+//   - [MapSet.SubsetOf] for a map with reversed arguments
 //
 // Performance:
 //   - time: O(k)
-func (m MapSet[K, V]) IsSuperset(keys iter.Seq[K]) bool {
+func (m MapSet[K, V]) ContainsAll(keys iter.Seq[K]) bool {
 	return allFunc(keys, m.Contains)
 }
 

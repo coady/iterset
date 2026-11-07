@@ -19,26 +19,26 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 	return m.equal(keys)
 }
 
-// IsSubset returns whether every map key is present in keys.
+// SubsetOf returns whether every map key is present in keys.
 //
 // Related:
-//   - [MapSet.IsSuperset] if the keys were a map
-//   - [IsSubset] if the receiver was not a map
+//   - [MapSet.ContainsAll] for the other polarity (better when the argument is a sequence)
+//   - [SubsetOf] if the receiver was not a map
 //
 // Performance:
 //   - time: O(k)
 //   - space: O(min(m, k))
-func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
+func (m MapSet[K, V]) SubsetOf(keys iter.Seq[K]) bool {
 	return len(m) == len(m.intersection(keys))
 }
 
-// IsDisjoint returns whether no keys are present.
+// Intersects reports whether any key is present.
 // Use [maps.Keys] on the smaller of two maps.
 //
 // Performance:
 //   - time: O(k)
-func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
-	return len(m) == 0 || allFunc(keys, m.Missing)
+func (m MapSet[K, V]) Intersects(keys iter.Seq[K]) bool {
+	return len(m) > 0 && !allFunc(keys, m.Missing)
 }
 
 // IntersectionWith keeps only the keys present in both.

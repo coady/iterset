@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 * `Keep` renamed `IntersectionWith`
 * `Remove` renamed `DifferenceWith`
 * `SortedIntersect` renamed `SortedIntersection`
+* `IsDisjoint` replaced by `Intersects` (inverted)
+* `IsSubset` renamed `SubsetOf`
+* `IsSuperset` renamed `ContainsAll`
 * `IntersectionWith`, `DifferenceWith`, `SymmetricDifference`, and `Overlap` accept maps in Go >=1.27
 
 ### Added
