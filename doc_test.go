@@ -313,7 +313,10 @@ func ExampleCollect() {
 
 func ExampleSet() {
 	fmt.Println(Set("b", "a", "b"))
-	// Output: map[a:{} b:{}]
+	fmt.Println(Of("b", "a", "b"))
+	// Output:
+	// map[a:{} b:{}]
+	// map[a:{} b:{}]
 }
 
 func ExampleIndex() {

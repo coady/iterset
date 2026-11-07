@@ -291,6 +291,7 @@ func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 // Set returns unique keys with an empty struct value.
 //
 // Related:
+//   - [Of] for the same constructor under the standard name
 //   - [Collect] for an iter.Seq
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 	s := make(MapSet[K, struct{}], len(keys))
@@ -298,6 +299,11 @@ func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 		s[key] = struct{}{}
 	}
 	return s
+}
+
+// Of is an alias for [Set].
+func Of[K comparable](keys ...K) MapSet[K, struct{}] {
+	return Set(keys...)
 }
 
 // Index returns unique keys with their first index position.

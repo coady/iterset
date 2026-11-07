@@ -104,14 +104,6 @@ func BenchmarkSubsetOfSlice(b *testing.B) {
 	}
 }
 
-func BenchmarkMapSet_SubsetOfMap(b *testing.B) {
-	s, k := setup(b)
-	other := Collect(k, struct{}{})
-	for b.Loop() {
-		s.SubsetOf(other)
-	}
-}
-
 func BenchmarkMapSet_Intersects(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {

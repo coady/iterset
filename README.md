@@ -37,7 +37,7 @@ There are constructors for all common use cases.
 * `Unique{By}` iterates keys in order
 * `Compact{By}` iterates consecutive grouped keys
 * `Collect` with default value
-* `Set` from variadic args
+* `Set` / `Of` from variadic args
 * `Index` retains original position
 * `Count` stores key counts
 * `IndexBy` stores values by key function
