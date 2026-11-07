@@ -25,7 +25,7 @@ func (m MapSet[K, V]) add(key K) {
 	m[key] = value
 }
 
-func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
+func (m MapSet[K, V]) intersection(keys iter.Seq[K]) MapSet[K, struct{}] {
 	s := Set[K]()
 	for key := range keys {
 		if m.Contains(key) {
@@ -38,7 +38,7 @@ func (m MapSet[K, V]) intersect(keys iter.Seq[K]) MapSet[K, struct{}] {
 	return s
 }
 
-func (m MapSet[K, V]) intersectCount(keys iter.Seq[K]) int {
+func (m MapSet[K, V]) intersectionCount(keys iter.Seq[K]) int {
 	if len(m) == 0 {
 		return 0
 	}
@@ -71,7 +71,7 @@ func (m MapSet[K, V]) filter(f func(K) bool) iter.Seq2[K, V] {
 }
 
 func (m MapSet[K, V]) difference(keys iter.Seq[K]) iter.Seq2[K, V] {
-	s := m.intersect(keys)
+	s := m.intersection(keys)
 	switch len(s) {
 	case 0:
 		return maps.All(m)
@@ -149,7 +149,7 @@ func (m MapSet[K, V]) Insert(key K) bool {
 // It reports whether len(m) changed.
 //
 // Related:
-//   - [MapSet.Remove] for many keys
+//   - [MapSet.DifferenceWith] for many keys
 //   - [MapSet.DeleteFunc] for a predicate
 func (m MapSet[K, V]) Delete(key K) bool {
 	size := len(m)
@@ -177,7 +177,8 @@ func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
 	}
 }
 
-// Toggle removes present keys, and inserts missing keys.
+// Toggle removes present keys and inserts missing keys with value.
+// Duplicate keys in the sequence are applied in order.
 //
 // Related:
 //   - [MapSet.SymmetricDifference] to not modify in-place

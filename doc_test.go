@@ -39,8 +39,8 @@ func Example_difference() {
 	// [d]
 }
 
-// Intersect a map with a slice of keys, retaining original order.
-func Example_intersect() {
+// Intersection of a map with a slice of keys, retaining original order.
+func Example_intersection() {
 	data := map[string]int{"a": 0, "b": 1, "c": 2}
 	keys := []string{"d", "c", "b"}
 
@@ -62,7 +62,7 @@ func Example_intersect() {
 
 	// Using an intersect method would also copy `keys`, and lose ordering.
 	// Whereas `iterset` methods have in-lined logic with zero copying and lazy iteration.
-	for key, value := range Cast(data).Intersect(slices.Values(keys)) {
+	for key, value := range Cast(data).Intersection(slices.Values(keys)) {
 		fmt.Println(key, value)
 	}
 	// Output:
@@ -231,11 +231,11 @@ func ExampleMapSet_Union() {
 	// Output: map[a:0 b:2 c:3]
 }
 
-func ExampleIntersect() {
+func ExampleIntersection() {
 	s1 := slices.Values([]string{"a", "b", "d", "b"})
 	s2 := []string{"a", "a", "b", "b", "c"}
-	fmt.Println(slices.Collect(Intersect(s1, slices.Values(s2))))
-	fmt.Println(slices.Collect(Intersect(s1, s2)))
+	fmt.Println(slices.Collect(Intersection(s1, slices.Values(s2))))
+	fmt.Println(slices.Collect(Intersection(s1, s2)))
 	// Output:
 	// [a b b]
 	// [a b b]
@@ -406,9 +406,9 @@ func ExampleSortedUnion() {
 	// Output: [a b b c d]
 }
 
-func ExampleSortedIntersect() {
+func ExampleSortedIntersection() {
 	s1, s2 := slices.Values([]string{"b", "c", "d", "d"}), slices.Values([]string{"a", "b", "d"})
-	fmt.Println(slices.Collect(SortedIntersect(s1, s2)))
+	fmt.Println(slices.Collect(SortedIntersection(s1, s2)))
 	// Output: [b d]
 }
 

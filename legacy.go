@@ -29,7 +29,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) IsSubset(keys iter.Seq[K]) bool {
-	return len(m) == len(m.intersect(keys))
+	return len(m) == len(m.intersection(keys))
 }
 
 // IsDisjoint returns whether no keys are present.
@@ -41,49 +41,49 @@ func (m MapSet[K, V]) IsDisjoint(keys iter.Seq[K]) bool {
 	return len(m) == 0 || allFunc(keys, m.Missing)
 }
 
-// Keep only the keys present in both.
-// Also known as intersection update.
+// IntersectionWith keeps only the keys present in both.
+// Receiver values are retained.
 //
 // Related:
-//   - [MapSet.Intersect] to not modify in-place
+//   - [MapSet.Intersection] to not modify in-place
 //
 // Performance:
 //   - time: O(m+k)
 //   - space: O(min(m, k))
-func (m MapSet[K, V]) Keep(keys iter.Seq[K]) {
-	s := m.intersect(keys)
+func (m MapSet[K, V]) IntersectionWith(keys iter.Seq[K]) {
+	s := m.intersection(keys)
 	if len(s) < len(m) {
 		keep(m, s)
 	}
 }
 
-// Intersect returns the ordered key-value pairs which are present in both.
+// Intersection returns the ordered key-value pairs which are present in both.
 // Use [maps.Keys] on the smaller of two maps.
 //
 // Related:
-//   - [MapSet.Keep] to modify in-place
+//   - [MapSet.IntersectionWith] to modify in-place
 //
 // Performance:
 //   - time: O(k)
-func (m MapSet[K, V]) Intersect(keys iter.Seq[K]) iter.Seq2[K, V] {
+func (m MapSet[K, V]) Intersection(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return m.mask(keys)
 }
 
-// IntersectCount returns the number of keys present in both.
+// IntersectionCount returns the number of keys present in both.
 //
 // Related:
 //   - [MapSet.Overlap] for distinct count
 //
 // Performance:
 //   - time: O(k)
-func (m MapSet[K, V]) IntersectCount(keys iter.Seq[K]) int {
-	return m.intersectCount(keys)
+func (m MapSet[K, V]) IntersectionCount(keys iter.Seq[K]) int {
+	return m.intersectionCount(keys)
 }
 
 // Difference returns the key-value pairs which are not present in the keys.
 //
 // Related:
-//   - [MapSet.Remove] to modify in-place
+//   - [MapSet.DifferenceWith] to modify in-place
 //   - [MapSet.ReverseDifference] if the keys were a map
 //   - [Difference] if the receiver was not a map
 //
@@ -94,11 +94,11 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 	return m.difference(keys)
 }
 
-// Remove keys.
+// DifferenceWith removes keys present in keys.
 //
 // Related:
 //   - [MapSet.Difference] to not modify in-place
-func (m MapSet[K, V]) Remove(keys iter.Seq[K]) {
+func (m MapSet[K, V]) DifferenceWith(keys iter.Seq[K]) {
 	m.remove(keys)
 }
 
@@ -122,7 +122,7 @@ func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 //   - Jaccard index: both / (left + both + right)
 //
 // Related:
-//   - [MapSet.IntersectCount] for just the intersection size
+//   - [MapSet.IntersectionCount] for just the intersection size
 //
 // Performance:
 //   - time: Θ(k)

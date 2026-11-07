@@ -33,34 +33,34 @@ func ExampleMapSet_IsDisjoint() {
 	// Output: true false
 }
 
-func ExampleMapSet_Keep() {
+func ExampleMapSet_IntersectionWith() {
 	s := Set("a", "b", "c")
-	s.Keep(slices.Values([]string{"b", "c", "d"}))
+	s.IntersectionWith(slices.Values([]string{"b", "c", "d"}))
 	fmt.Println(s)
-	s.Keep(Set("a"))
+	s.IntersectionWith(Set("a"))
 	fmt.Println(s)
 	// Output:
 	// map[b:{} c:{}]
 	// map[]
 }
 
-func ExampleMapSet_Intersect() {
+func ExampleMapSet_Intersection() {
 	m := MapSet[string, int]{"a": 0, "b": 1}
 	s := slices.Values([]string{"b", "c", "d"})
-	for key, value := range m.Intersect(s) {
+	for key, value := range m.Intersection(s) {
 		fmt.Println(key, value)
 	}
-	fmt.Println(maps.Collect(m.Intersect(Count(s))))
-	fmt.Println(maps.Collect(Count(s).Intersect(m)))
+	fmt.Println(maps.Collect(m.Intersection(Count(s))))
+	fmt.Println(maps.Collect(Count(s).Intersection(m)))
 	// Output:
 	// b 1
 	// map[b:1]
 	// map[b:1]
 }
 
-func ExampleMapSet_IntersectCount() {
+func ExampleMapSet_IntersectionCount() {
 	s, k := Set("a", "b"), []string{"b", "c", "d"}
-	fmt.Println(s.IntersectCount(slices.Values(k)), s.IntersectCount(Set(k...)))
+	fmt.Println(s.IntersectionCount(slices.Values(k)), s.IntersectionCount(Set(k...)))
 	// Output: 1 1
 }
 
@@ -74,19 +74,19 @@ func ExampleMapSet_Difference() {
 	// map[a:{}] map[a:{} b:{}]
 }
 
-func ExampleMapSet_Remove() {
+func ExampleMapSet_DifferenceWith() {
 	s := Set("a", "b", "c")
-	s.Remove(slices.Values([]string{"c", "d"}))
+	s.DifferenceWith(slices.Values([]string{"c", "d"}))
 	fmt.Println(s)
-	s.Remove(Set("a", "x"))
+	s.DifferenceWith(Set("a", "x"))
 	fmt.Println(s)
 	// Output:
 	// map[a:{} b:{}]
 	// map[b:{}]
 }
 
-func TestRemovet(t *testing.T) {
-	Set("a").Remove(Set("a", "b"))
+func TestDifferenceWith(t *testing.T) {
+	Set("a").DifferenceWith(Set("a", "b"))
 }
 
 func ExampleMapSet_SymmetricDifference() {

@@ -126,18 +126,18 @@ func BenchmarkIsDisjointSlice(b *testing.B) {
 	}
 }
 
-func BenchmarkMapSet_Intersect(b *testing.B) {
+func BenchmarkMapSet_Intersection(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		for range s.Intersect(k) {
+		for range s.Intersection(k) {
 		}
 	}
 }
 
-func BenchmarkIntersect(b *testing.B) {
+func BenchmarkIntersection(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		for range Intersect(maps.Keys(s), k) {
+		for range Intersection(maps.Keys(s), k) {
 		}
 	}
 }
@@ -146,7 +146,7 @@ func BenchmarkIntersectSlice(b *testing.B) {
 	s, k := setup(b)
 	slc := slices.Collect(k)
 	for b.Loop() {
-		for range Intersect(maps.Keys(s), slc) {
+		for range Intersection(maps.Keys(s), slc) {
 		}
 	}
 }
@@ -199,10 +199,10 @@ func BenchmarkMapSet_Overlap(b *testing.B) {
 	}
 }
 
-func BenchmarkMapSet_IntersectCount(b *testing.B) {
+func BenchmarkMapSet_IntersectionCount(b *testing.B) {
 	s, k := setup(b)
 	for b.Loop() {
-		s.IntersectCount(k)
+		s.IntersectionCount(k)
 	}
 }
 
@@ -268,7 +268,7 @@ func BenchmarkSorted(b *testing.B) {
 	for b.Loop() {
 		for range SortedUnion(k, v) {
 		}
-		for range SortedIntersect(k, v) {
+		for range SortedIntersection(k, v) {
 		}
 		for range SortedDifference(k, v) {
 		}
@@ -282,7 +282,7 @@ func BenchmarkSortedSlice(b *testing.B) {
 	for b.Loop() {
 		for range SortedUnion(k, v) {
 		}
-		for range SortedIntersect(k, v) {
+		for range SortedIntersection(k, v) {
 		}
 		for range SortedDifference(k, v) {
 		}

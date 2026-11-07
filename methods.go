@@ -57,7 +57,7 @@ func (m MapSet[K, V]) IsSubset[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 	case MapSet[K, V]:
 		return len(m) <= len(keys) && keys.IsSuperset(maps.Keys(m))
 	}
-	return len(m) == len(m.intersect(it))
+	return len(m) == len(m.intersection(it))
 }
 
 // IsDisjoint returns whether no keys are present.
@@ -80,20 +80,20 @@ func (m MapSet[K, V]) IsDisjoint[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 	return len(m) == 0 || allFunc(it, m.Missing)
 }
 
-// Keep only the keys present in both.
-// Also known as intersection update.
+// IntersectionWith keeps only the keys present in both.
+// Receiver values are retained.
 //
 // Related:
-//   - [MapSet.Intersect] to not modify in-place
+//   - [MapSet.Intersection] to not modify in-place
 //
 // Performance:
 //   - time: O(m+k) if seq
 //   - time: O(m) if map
 //   - space: O(min(m, k)) if seq
-func (m MapSet[K, V]) Keep[S iter.Seq[K] | MapSet[K, V]](keys S) {
+func (m MapSet[K, V]) IntersectionWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
-		s := m.intersect(keys)
+		s := m.intersection(keys)
 		if len(s) < len(m) {
 			keep(m, s)
 		}
@@ -102,16 +102,16 @@ func (m MapSet[K, V]) Keep[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	}
 }
 
-// Intersect returns the ordered key-value pairs which are present in both.
+// Intersection returns the ordered key-value pairs which are present in both.
 // Use [maps.Keys] on the smaller of maps with different value types.
 //
 // Related:
-//   - [MapSet.Keep] to modify in-place
+//   - [MapSet.IntersectionWith] to modify in-place
 //
 // Performance:
 //   - time: O(k) if seq
 //   - time: O(min(m, k)) if map
-func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
+func (m MapSet[K, V]) Intersection[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[K, V] {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
@@ -125,7 +125,7 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 	return m.mask(it)
 }
 
-// IntersectCount returns the number of keys present in both.
+// IntersectionCount returns the number of keys present in both.
 // Use [maps.Keys] on the smaller of maps with different value types.
 // Sequences count duplicate keys.
 //
@@ -135,7 +135,7 @@ func (m MapSet[K, V]) Intersect[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Seq2[
 // Performance:
 //   - time: O(k) if seq
 //   - time: O(min(m, k)) if map
-func (m MapSet[K, V]) IntersectCount[S iter.Seq[K] | MapSet[K, V]](keys S) int {
+func (m MapSet[K, V]) IntersectionCount[S iter.Seq[K] | MapSet[K, V]](keys S) int {
 	var it iter.Seq[K]
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
@@ -146,13 +146,13 @@ func (m MapSet[K, V]) IntersectCount[S iter.Seq[K] | MapSet[K, V]](keys S) int {
 			m, it = keys, maps.Keys(m)
 		}
 	}
-	return m.intersectCount(it)
+	return m.intersectionCount(it)
 }
 
 // Difference returns the key-value pairs which are not present in the keys.
 //
 // Related:
-//   - [MapSet.Remove] to modify in-place
+//   - [MapSet.DifferenceWith] to modify in-place
 //   - [MapSet.ReverseDifference] with [maps.Keys] for maps with different value types
 //   - [Difference] if the receiver was not a map
 //
@@ -173,7 +173,7 @@ func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.
 	return it
 }
 
-// Remove keys.
+// DifferenceWith removes keys present in keys.
 // Use [maps.Keys] on the smaller of maps with different value types.
 //
 // Related:
@@ -182,7 +182,7 @@ func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.
 // Performance:
 //   - time: O(k) if seq
 //   - time: O(min(m, k)) if map
-func (m MapSet[K, V]) Remove[S iter.Seq[K] | MapSet[K, V]](keys S) {
+func (m MapSet[K, V]) DifferenceWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
 		m.remove(keys)
@@ -239,7 +239,7 @@ func (m MapSet[K, V]) SymmetricDifference[S iter.Seq[K] | MapSet[K, V]](keys S) 
 //   - Jaccard index: both / (left + both + right)
 //
 // Related:
-//   - [MapSet.IntersectCount] for just the intersection size
+//   - [MapSet.IntersectionCount] for just the intersection size
 //
 // Performance:
 //   - time: Θ(k) if seq
@@ -250,7 +250,7 @@ func (m MapSet[K, V]) Overlap[S iter.Seq[K] | MapSet[K, V]](keys S) (left, both,
 	case iter.Seq[K]:
 		left, both, right = m.overlap(keys)
 	case MapSet[K, V]:
-		both = m.IntersectCount(keys)
+		both = m.IntersectionCount(keys)
 		left, right = len(m)-both, len(keys)-both
 	}
 	return left, both, right

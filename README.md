@@ -53,18 +53,18 @@ Methods support iterators, compatible with `slices.Values` and `maps.Keys`. Impl
 * `IsSuperset`
 * `IsDisjoint`
 * `Union`
-* `Intersect`
-* `Difference`
+* `Intersection{With}`
+* `Difference{With}`
 * `ReverseDifference`
 * `SymmetricDifference`
+* `Toggle`
 
 As of Go 1.27, generic methods support iterators, slices, and maps if there are performance benefits. Slices and maps may exit early based on size; maps may use an asymptotically better algorithm.
 * `Equal`
 * `IsSubset`
 * `IsDisjoint`
-* `Intersect{Count}`
-* `Difference`
-* `Remove`
+* `Intersection{Count,With}`
+* `Difference{With}`
 * `SymmetricDifference`
 * `Overlap`
 
@@ -73,9 +73,9 @@ Some operations are also functions, to avoid making unnecessary maps. Note there
 * `Equal{Counts}`
 * `IsSubset`
 * `IsDisjoint`
-* `Intersect`
+* `Intersection`
 * `Difference`
-* `Sorted{Union,Intersect,Difference}`
+* `Sorted{Union,Intersection,Difference}`
 
 Includes general sequence utilities which complement the set operations. These are subject to change as [iter patterns](https://github.com/golang/go/issues/61898) progress.
 * `IsEmpty`

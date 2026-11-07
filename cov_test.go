@@ -23,7 +23,7 @@ func TestBreak(t *testing.T) {
 	for range CompactBy(k, strings.TrimSpace) {
 		break
 	}
-	for range Set("a").Intersect(k) {
+	for range Set("a").Intersection(k) {
 		break
 	}
 	for range Set("a", "b").Difference(k) {
@@ -46,7 +46,7 @@ func TestBreak(t *testing.T) {
 	for range SortedUnion(k, slices.Values([]string{""})) {
 		break
 	}
-	for range SortedIntersect(k, slices.Values([]string{"a"})) {
+	for range SortedIntersection(k, slices.Values([]string{"a"})) {
 		break
 	}
 	for range SortedDifference(k, slices.Values([]string{"a"})) {
@@ -68,7 +68,7 @@ func TestExit(t *testing.T) {
 	if IsSubset(slices.Values([]string{"b"}), k) {
 		t.Errorf("should be false")
 	}
-	for range Intersect(k, slices.Values([]string{})) {
+	for range Intersection(k, slices.Values([]string{})) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -82,10 +82,10 @@ func TestEmpty(t *testing.T) {
 	if m.Union() == nil {
 		t.Error("should not be nil")
 	}
-	for range m.Intersect(maps.Keys(m)) {
+	for range m.Intersection(maps.Keys(m)) {
 		t.Error("should be empty")
 	}
-	for range Intersect(maps.Keys(m), maps.Keys(m)) {
+	for range Intersection(maps.Keys(m), maps.Keys(m)) {
 		t.Error("should be empty")
 	}
 	for range m.ReverseDifference(maps.Keys(m)) {
@@ -95,10 +95,10 @@ func TestEmpty(t *testing.T) {
 		t.Error("should be empty")
 	}
 	m.Delete("")
-	m.Remove(slices.Values([]string{""}))
+	m.DifferenceWith(slices.Values([]string{""}))
 	k := slices.Values([]string{})
-	Set("").Keep(k)
-	m.IntersectCount(k)
+	Set("").IntersectionWith(k)
+	m.IntersectionCount(k)
 }
 
 func assertMulti[K any](t *testing.T, seq iter.Seq[K]) {
@@ -111,7 +111,7 @@ func assertMulti[K any](t *testing.T, seq iter.Seq[K]) {
 func TestMulti(t *testing.T) {
 	k := slices.Values([]string{"a", "A", "b"})
 	assertMulti(t, difference(k, k))
-	assertMulti(t, intersect(k, k))
+	assertMulti(t, intersection(k, k))
 	assertMulti(t, Unique(k))
 	assertMulti(t, Keys(UniqueBy(k, strings.ToLower)))
 	assertMulti(t, Keys(Compact(k)))

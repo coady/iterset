@@ -89,7 +89,7 @@ func zip[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq2[K, zipS
 	}
 }
 
-func intersect[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
+func intersection[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		counts := [2]MapSet[K, int]{{}, {}}
 		for key, source := range zip(keys, seq) {
@@ -203,22 +203,22 @@ func IsSubset[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 //   - time: O(k)
 //   - space: O(k)
 func IsDisjoint[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
-	return IsEmpty(intersect(keys, seq))
+	return IsEmpty(intersection(keys, seq))
 }
 
-// Intersect returns the ordered keys which are present in the sequence(s).
+// Intersection returns the ordered keys which are present in the sequence(s).
 // Duplicates are matched one-to-one.
 //
 // Related:
-//   - [MapSet.Intersect] if the sequence was a map
-//   - [SortedIntersect] if sequences are sorted
+//   - [MapSet.Intersection] if the sequence was a map
+//   - [SortedIntersection] if sequences are sorted
 //
 // Performance:
 //   - time: O(k)
 //   - space: O(k)
-func Intersect[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
+func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seqs ...S) iter.Seq[K] {
 	for _, seq := range seqs {
-		keys = intersect(keys, seq)
+		keys = intersection(keys, seq)
 	}
 	return keys
 }
@@ -449,16 +449,16 @@ func sortedUnionFunc[V any, S iterable[V]](
 	}
 }
 
-// SortedIntersect returns the intersection of sorted keys.
+// SortedIntersection returns the intersection of sorted keys.
 // Duplicates are matched one-to-one.
 //
 // Performance:
 //   - time: O(k)
-func SortedIntersect[K cmp.Ordered, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
-	return Keys(sortedIntersectFunc(keys, seq, cmp.Compare))
+func SortedIntersection[K cmp.Ordered, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
+	return Keys(sortedIntersectionFunc(keys, seq, cmp.Compare))
 }
 
-func sortedIntersectFunc[K, V any, S iterable[V]](
+func sortedIntersectionFunc[K, V any, S iterable[V]](
 	keys iter.Seq[K], values S, compare func(K, V) int,
 ) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
