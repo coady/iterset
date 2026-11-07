@@ -219,15 +219,29 @@ func ExampleMapSet_DeleteFunc() {
 
 func ExampleMapSet_Toggle() {
 	s := Set("a", "b")
-	s.Toggle(maps.Keys(Set("b", "c")), struct{}{})
+	s.Toggle(slices.Values([]string{"b", "b"}), struct{}{})
 	fmt.Println(s)
-	// Output: map[a:{} c:{}]
+	// Output: map[a:{} b:{}]
+}
+
+func ExampleMapSet_SymmetricDifferenceWith() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	m.SymmetricDifferenceWith(MapSet[string, int]{"b": 2, "c": 3})
+	fmt.Println(m)
+	// Output: map[a:0 c:3]
 }
 
 func ExampleMapSet_Union() {
 	m := map[string]int{"a": 0, "b": 1}
 	n := map[string]int{"b": 2, "c": 3}
 	fmt.Println(Cast(m).Union(maps.All(n)))
+	// Output: map[a:0 b:2 c:3]
+}
+
+func ExampleMapSet_UnionWith() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	m.UnionWith(maps.All(map[string]int{"b": 2, "c": 3}))
+	fmt.Println(m)
 	// Output: map[a:0 b:2 c:3]
 }
 

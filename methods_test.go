@@ -98,6 +98,13 @@ func ExampleMapSet_SymmetricDifference() {
 	// true
 }
 
+func ExampleMapSet_UnionWith_map() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	m.UnionWith(MapSet[string, int]{"b": 2, "c": 3})
+	fmt.Println(m)
+	// Output: map[a:0 b:2 c:3]
+}
+
 func TestSymmetricDifference(t *testing.T) {
 	for range Set("a", "b").SymmetricDifference(Set("c")) {
 		break

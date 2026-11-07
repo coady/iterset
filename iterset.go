@@ -184,9 +184,29 @@ func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
 // Duplicate keys in the sequence are applied in order.
 //
 // Related:
+//   - [MapSet.SymmetricDifferenceWith] for a map
 //   - [MapSet.SymmetricDifference] to not modify in-place
 func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 	for key := range keys {
+		if m.Contains(key) {
+			delete(m, key)
+		} else {
+			m[key] = value
+		}
+	}
+}
+
+// SymmetricDifferenceWith updates the receiver to the symmetric difference with keys.
+// Keys present in both are removed; keys only in keys are inserted with their values.
+//
+// Related:
+//   - [MapSet.Toggle] for a sequence
+//   - [MapSet.SymmetricDifference] to not modify in-place
+//
+// Performance:
+//   - time: O(k)
+func (m MapSet[K, V]) SymmetricDifferenceWith(keys MapSet[K, V]) {
+	for key, value := range keys {
 		if m.Contains(key) {
 			delete(m, key)
 		} else {
@@ -199,7 +219,7 @@ func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 // Duplicate keys overwrite values.
 //
 // Related:
-//   - [maps.Insert] to modify in-place
+//   - [MapSet.UnionWith] to modify in-place
 //   - [SortedUnion] for sorted sequences
 //
 // Performance:

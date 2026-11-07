@@ -199,7 +199,7 @@ func (m MapSet[K, V]) DifferenceWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 // Use [maps.Keys] for maps with different value types.
 //
 // Related:
-//   - [MapSet.Toggle] to modify in-place
+//   - [MapSet.SymmetricDifferenceWith] to modify in-place
 //
 // Performance:
 //   - time: O(m+k)
@@ -228,6 +228,25 @@ func (m MapSet[K, V]) SymmetricDifference[S iter.Seq[K] | MapSet[K, V]](keys S) 
 		}
 	}
 	return it
+}
+
+// UnionWith merges keys with inserts.
+// Duplicate keys overwrite values.
+//
+// Related:
+//   - [MapSet.Union] to not modify in-place
+//   - [maps.Insert] for an iter.Seq2
+//   - [maps.Copy] for a map
+//
+// Performance:
+//   - time: O(k)
+func (m MapSet[K, V]) UnionWith[S iter.Seq2[K, V] | MapSet[K, V]](keys S) {
+	switch keys := any(keys).(type) {
+	case iter.Seq2[K, V]:
+		maps.Insert(m, keys)
+	case MapSet[K, V]:
+		maps.Copy(m, keys)
+	}
 }
 
 // Overlap returns the sizes of the intersection and differences:

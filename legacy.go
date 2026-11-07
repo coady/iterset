@@ -4,6 +4,7 @@ package iterset
 
 import (
 	"iter"
+	"maps"
 )
 
 // Equal returns whether the key sets are equivalent.
@@ -105,13 +106,23 @@ func (m MapSet[K, V]) DifferenceWith(keys iter.Seq[K]) {
 // SymmetricDifference returns keys which are not in both.
 //
 // Related:
-//   - [MapSet.Toggle] to modify in-place
+//   - [MapSet.SymmetricDifferenceWith] to modify in-place
 //
 // Performance:
 //   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) SymmetricDifference(keys iter.Seq[K]) iter.Seq[K] {
 	return m.symmetricDifference(keys)
+}
+
+// UnionWith merges keys with inserts.
+// Duplicate keys overwrite values.
+//
+// Related:
+//   - [MapSet.Union] to not modify in-place
+//   - [maps.Insert] for the same operation
+func (m MapSet[K, V]) UnionWith(seq iter.Seq2[K, V]) {
+	maps.Insert(m, seq)
 }
 
 // Overlap returns the sizes of the intersection and differences:
