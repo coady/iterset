@@ -110,8 +110,8 @@ func assertMulti[K any](t *testing.T, seq iter.Seq[K]) {
 
 func TestMulti(t *testing.T) {
 	k := slices.Values([]string{"a", "A", "b"})
-	assertMulti(t, difference(k, k))
-	assertMulti(t, intersection(k, k))
+	assertMulti(t, Difference(k, k))
+	assertMulti(t, Intersection(k, k))
 	assertMulti(t, Unique(k))
 	assertMulti(t, Keys(UniqueBy(k, strings.ToLower)))
 	assertMulti(t, Keys(Compact(k)))

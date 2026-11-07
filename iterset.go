@@ -25,7 +25,7 @@ func (m MapSet[K, V]) add(key K) {
 	m[key] = value
 }
 
-func (m MapSet[K, V]) intersection(keys iter.Seq[K]) MapSet[K, struct{}] {
+func (m MapSet[K, V]) intersectionSet(keys iter.Seq[K]) MapSet[K, struct{}] {
 	s := Set[K]()
 	for key := range keys {
 		if m.Contains(key) {
@@ -70,18 +70,7 @@ func (m MapSet[K, V]) filter(f func(K) bool) iter.Seq2[K, V] {
 	}
 }
 
-func (m MapSet[K, V]) difference(keys iter.Seq[K]) iter.Seq2[K, V] {
-	s := m.intersection(keys)
-	switch len(s) {
-	case 0:
-		return maps.All(m)
-	case len(m):
-		return func(func(K, V) bool) {}
-	}
-	return m.filter(s.Missing)
-}
-
-func (m MapSet[K, V]) mask(keys iter.Seq[K]) iter.Seq2[K, V] {
+func (m MapSet[K, V]) intersection(keys iter.Seq[K]) iter.Seq2[K, V] {
 	if len(m) == 0 {
 		return maps.All(m)
 	}
@@ -100,6 +89,26 @@ func intersectionWith[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, 
 		clear(m)
 	} else {
 		maps.DeleteFunc(m, func(key K, _ V1) bool { return !keys.Contains(key) })
+	}
+}
+
+func (m MapSet[K, V]) difference(keys iter.Seq[K]) iter.Seq2[K, V] {
+	s := m.intersectionSet(keys)
+	switch len(s) {
+	case 0:
+		return maps.All(m)
+	case len(m):
+		return func(func(K, V) bool) {}
+	}
+	return m.filter(s.Missing)
+}
+
+func (m MapSet[K, V]) differenceWith(keys iter.Seq[K]) {
+	for key := range keys {
+		delete(m, key)
+		if len(m) == 0 {
+			return
+		}
 	}
 }
 
@@ -143,8 +152,7 @@ func (m MapSet[K, V]) Insert(key K) bool {
 	if m.Contains(key) {
 		return false
 	}
-	var value V
-	m[key] = value
+	m.add(key)
 	return true
 }
 
@@ -171,12 +179,11 @@ func (m MapSet[K, V]) DeleteFunc(del func(K) bool) bool {
 	return len(m) < size
 }
 
-func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
-	for key := range keys {
+func (m MapSet[K, V]) toggle(key K, value V) {
+	if m.Contains(key) {
 		delete(m, key)
-		if len(m) == 0 {
-			return
-		}
+	} else {
+		m[key] = value
 	}
 }
 
@@ -185,14 +192,9 @@ func (m MapSet[K, V]) remove(keys iter.Seq[K]) {
 //
 // Related:
 //   - [MapSet.SymmetricDifferenceWith] for a map
-//   - [MapSet.SymmetricDifference] to not modify in-place
 func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 	for key := range keys {
-		if m.Contains(key) {
-			delete(m, key)
-		} else {
-			m[key] = value
-		}
+		m.toggle(key, value)
 	}
 }
 
@@ -207,11 +209,7 @@ func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 //   - time: O(k)
 func (m MapSet[K, V]) SymmetricDifferenceWith(keys MapSet[K, V]) {
 	for key, value := range keys {
-		if m.Contains(key) {
-			delete(m, key)
-		} else {
-			m[key] = value
-		}
+		m.toggle(key, value)
 	}
 }
 

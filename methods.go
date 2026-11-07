@@ -57,7 +57,7 @@ func (m MapSet[K, V]) SubsetOf[S iter.Seq[K] | []K | MapSet[K, V]](keys S) bool 
 	case MapSet[K, V]:
 		return len(m) <= len(keys) && keys.ContainsAll(maps.Keys(m))
 	}
-	return len(m) == len(m.intersection(it))
+	return len(m) == len(m.intersectionSet(it))
 }
 
 // Intersects reports whether any key is present.
@@ -93,7 +93,7 @@ func (m MapSet[K, V]) Intersects[S iter.Seq[K] | MapSet[K, V]](keys S) bool {
 func (m MapSet[K, V]) IntersectionWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
-		s := m.intersection(keys)
+		s := m.intersectionSet(keys)
 		if len(s) < len(m) {
 			intersectionWith(m, s)
 		}
@@ -122,7 +122,7 @@ func (m MapSet[K, V]) Intersection[S iter.Seq[K] | MapSet[K, V]](keys S) iter.Se
 		}
 		it = maps.Keys(keys)
 	}
-	return m.mask(it)
+	return m.intersection(it)
 }
 
 // IntersectionCount returns the number of keys present in both.
@@ -185,12 +185,12 @@ func (m MapSet[K, V]) Difference[S iter.Seq[K] | MapSet[K, V]](keys S) (it iter.
 func (m MapSet[K, V]) DifferenceWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
-		m.remove(keys)
+		m.differenceWith(keys)
 	case MapSet[K, V]:
 		if len(m) < len(keys) {
 			maps.DeleteFunc(m, func(key K, _ V) bool { return keys.Contains(key) })
 		} else {
-			m.remove(maps.Keys(keys))
+			m.differenceWith(maps.Keys(keys))
 		}
 	}
 }

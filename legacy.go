@@ -30,7 +30,7 @@ func (m MapSet[K, V]) Equal(keys iter.Seq[K]) bool {
 //   - time: O(k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) SubsetOf(keys iter.Seq[K]) bool {
-	return len(m) == len(m.intersection(keys))
+	return len(m) == len(m.intersectionSet(keys))
 }
 
 // Intersects reports whether any key is present.
@@ -52,7 +52,7 @@ func (m MapSet[K, V]) Intersects(keys iter.Seq[K]) bool {
 //   - time: O(m+k)
 //   - space: O(min(m, k))
 func (m MapSet[K, V]) IntersectionWith(keys iter.Seq[K]) {
-	s := m.intersection(keys)
+	s := m.intersectionSet(keys)
 	if len(s) < len(m) {
 		intersectionWith(m, s)
 	}
@@ -67,7 +67,7 @@ func (m MapSet[K, V]) IntersectionWith(keys iter.Seq[K]) {
 // Performance:
 //   - time: O(k)
 func (m MapSet[K, V]) Intersection(keys iter.Seq[K]) iter.Seq2[K, V] {
-	return m.mask(keys)
+	return m.intersection(keys)
 }
 
 // IntersectionCount returns the number of keys present in both.
@@ -100,7 +100,7 @@ func (m MapSet[K, V]) Difference(keys iter.Seq[K]) iter.Seq2[K, V] {
 // Related:
 //   - [MapSet.Difference] to not modify in-place
 func (m MapSet[K, V]) DifferenceWith(keys iter.Seq[K]) {
-	m.remove(keys)
+	m.differenceWith(keys)
 }
 
 // SymmetricDifference returns keys which are not in both.

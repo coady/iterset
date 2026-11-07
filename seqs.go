@@ -50,23 +50,6 @@ func pull[V any, I iterable[V]](it I) (next func() (V, bool), stop func()) {
 	return next, stop
 }
 
-func difference[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
-	s := sized[K, struct{}, K](seq)
-	return func(yield func(K) bool) {
-		next, stop := pull[K](seq)
-		defer stop()
-		k, ok := next()
-		for key := range keys {
-			for ; ok && !s.Contains(key); k, ok = next() {
-				s.add(k)
-			}
-			if !s.Contains(key) && !yield(key) {
-				return
-			}
-		}
-	}
-}
-
 type zipSource struct {
 	index int8 // which sequence the value is from
 	empty bool // whether the other sequence is empty
@@ -85,28 +68,6 @@ func zip[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq2[K, zipS
 		}
 		source.empty = true
 		for k, ok := next(); ok && yield(k, source); k, ok = next() {
-		}
-	}
-}
-
-func intersection[K comparable, S iterable[K]](keys iter.Seq[K], seq S) iter.Seq[K] {
-	return func(yield func(K) bool) {
-		counts := [2]MapSet[K, int]{{}, {}}
-		for key, source := range zip(keys, seq) {
-			m := counts[1-source.index]
-			if m[key] > 0 {
-				m[key] -= 1
-				if m[key] == 0 {
-					delete(m, key)
-				}
-				if !yield(key) {
-					return
-				}
-			} else if !source.empty {
-				counts[source.index][key] += 1
-			} else if len(m) == 0 {
-				return
-			}
 		}
 	}
 }
@@ -192,7 +153,7 @@ func EqualCounts[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) boo
 //   - time: O(k)
 //   - space: O(k)
 func SubsetOf[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
-	return IsEmpty(difference(keys, seq))
+	return IsEmpty(Difference(keys, seq))
 }
 
 // Intersects reports whether any key is present in the sequence.
@@ -204,7 +165,7 @@ func SubsetOf[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
 //   - time: O(k)
 //   - space: O(k)
 func Intersects[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool {
-	return !IsEmpty(intersection(keys, seq))
+	return !IsEmpty(Intersection(keys, seq))
 }
 
 // Intersection returns the ordered keys which are present in both sequences.
@@ -218,7 +179,25 @@ func Intersects[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) bool
 //   - time: O(k)
 //   - space: O(k)
 func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
-	return intersection(keys, seq)
+	return func(yield func(K) bool) {
+		counts := [2]MapSet[K, int]{{}, {}}
+		for key, source := range zip(keys, seq) {
+			m := counts[1-source.index]
+			if m[key] > 0 {
+				m[key] -= 1
+				if m[key] == 0 {
+					delete(m, key)
+				}
+				if !yield(key) {
+					return
+				}
+			} else if !source.empty {
+				counts[source.index][key] += 1
+			} else if len(m) == 0 {
+				return
+			}
+		}
+	}
 }
 
 // Difference returns the ordered keys which are not present in the other sequence.
@@ -231,7 +210,20 @@ func Intersection[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) it
 //   - time: O(k)
 //   - space: O(k)
 func Difference[K comparable, S iter.Seq[K] | []K](keys iter.Seq[K], seq S) iter.Seq[K] {
-	return difference(keys, seq)
+	s := sized[K, struct{}, K](seq)
+	return func(yield func(K) bool) {
+		next, stop := pull[K](seq)
+		defer stop()
+		k, ok := next()
+		for key := range keys {
+			for ; ok && !s.Contains(key); k, ok = next() {
+				s.add(k)
+			}
+			if !s.Contains(key) && !yield(key) {
+				return
+			}
+		}
+	}
 }
 
 // Unique returns keys in order without duplicates.
