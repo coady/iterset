@@ -231,19 +231,6 @@ func ExampleMapSet_SymmetricDifferenceWith() {
 	// Output: map[a:0 c:3]
 }
 
-func ExampleMapSet_Union() {
-	m := MapSet[string, int]{"a": 0, "b": 1}
-	fmt.Println(m.Union(maps.All(map[string]int{"b": 2, "c": 3})))
-	// Output: map[a:0 b:2 c:3]
-}
-
-func ExampleMapSet_UnionWith() {
-	m := MapSet[string, int]{"a": 0, "b": 1}
-	m.UnionWith(maps.All(map[string]int{"b": 2, "c": 3}))
-	fmt.Println(m)
-	// Output: map[a:0 b:2 c:3]
-}
-
 func ExampleIntersection() {
 	s1 := slices.Values([]string{"a", "b", "d", "b"})
 	s2 := []string{"a", "a", "b", "b", "c"}

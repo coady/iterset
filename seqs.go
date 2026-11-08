@@ -239,10 +239,9 @@ func Unique[K comparable](keys iter.Seq[K]) iter.Seq[K] {
 	return func(yield func(K) bool) {
 		s := Set[K]()
 		for key := range keys {
-			if !s.Contains(key) && !yield(key) {
+			if s.Insert(key) && !yield(key) {
 				return
 			}
-			s.add(key)
 		}
 	}
 }
@@ -262,10 +261,9 @@ func UniqueBy[K comparable, V any, S iter.Seq[V] | []V](values S, key func(V) K)
 		s := sized[K, struct{}, V](values)
 		for value := range sequence[V](values) {
 			k := key(value)
-			if !s.Contains(k) && !yield(k, value) {
+			if s.Insert(k) && !yield(k, value) {
 				return
 			}
-			s.add(k)
 		}
 	}
 }

@@ -67,6 +67,19 @@ func ExampleMapSet_SymmetricDifference() {
 	// Output: [c a]
 }
 
+func ExampleMapSet_Union() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	fmt.Println(m.Union(maps.All(map[string]int{"b": 2, "c": 3})))
+	// Output: map[a:0 b:2 c:3]
+}
+
+func ExampleMapSet_UnionWith() {
+	m := MapSet[string, int]{"a": 0, "b": 1}
+	m.UnionWith(maps.All(map[string]int{"b": 2, "c": 3}))
+	fmt.Println(m)
+	// Output: map[a:0 b:2 c:3]
+}
+
 func ExampleMapSet_Overlap() {
 	s, k := Set("a", "b", "c"), []string{"b", "c", "d"}
 	fmt.Println(s.Overlap(slices.Values(k)))

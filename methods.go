@@ -188,7 +188,7 @@ func (m MapSet[K, V]) DifferenceWith[S iter.Seq[K] | MapSet[K, V]](keys S) {
 		m.differenceWith(keys)
 	case MapSet[K, V]:
 		if len(m) < len(keys) {
-			maps.DeleteFunc(m, func(key K, _ V) bool { return keys.Contains(key) })
+			m.DeleteFunc(keys.Contains)
 		} else {
 			m.differenceWith(maps.Keys(keys))
 		}
@@ -286,10 +286,10 @@ func (m MapSet[K, V]) UnionWith[S iter.Seq2[K, V] | MapSet[K, V]](keys S) {
 func (m MapSet[K, V]) Overlap[S iter.Seq[K] | MapSet[K, V]](keys S) (left, both, right int) {
 	switch keys := any(keys).(type) {
 	case iter.Seq[K]:
-		left, both, right = m.overlap(keys)
+		_, both, right = m.overlap(keys)
 	case MapSet[K, V]:
 		both = m.IntersectionCount(keys)
-		left, right = len(m)-both, len(keys)-both
+		right = len(keys) - both
 	}
-	return left, both, right
+	return len(m) - both, both, right
 }

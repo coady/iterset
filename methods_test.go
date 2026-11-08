@@ -78,15 +78,14 @@ func ExampleMapSet_DifferenceWith() {
 	s := Set("a", "b", "c")
 	s.DifferenceWith(slices.Values([]string{"c", "d"}))
 	fmt.Println(s)
-	s.DifferenceWith(Set("a", "x"))
+	s.DifferenceWith(Set("b", "c"))
+	fmt.Println(s)
+	s.DifferenceWith(Set("a", "b"))
 	fmt.Println(s)
 	// Output:
 	// map[a:{} b:{}]
-	// map[b:{}]
-}
-
-func TestDifferenceWith(t *testing.T) {
-	Set("a").DifferenceWith(Set("a", "b"))
+	// map[a:{}]
+	// map[]
 }
 
 func ExampleMapSet_SymmetricDifference() {
@@ -98,13 +97,13 @@ func ExampleMapSet_SymmetricDifference() {
 	// true
 }
 
-func ExampleMapSet_Union_map() {
+func ExampleMapSet_Union() {
 	m := MapSet[string, int]{"a": 0, "b": 1}
 	fmt.Println(m.Union(MapSet[string, int]{"b": 2, "c": 3}))
 	// Output: map[a:0 b:2 c:3]
 }
 
-func ExampleMapSet_UnionWith_map() {
+func ExampleMapSet_UnionWith() {
 	m := MapSet[string, int]{"a": 0, "b": 1}
 	m.UnionWith(MapSet[string, int]{"b": 2, "c": 3})
 	fmt.Println(m)

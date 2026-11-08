@@ -88,7 +88,7 @@ func intersectionWith[K comparable, V1, V2 any](m MapSet[K, V1], keys MapSet[K, 
 	if len(keys) == 0 {
 		clear(m)
 	} else {
-		maps.DeleteFunc(m, func(key K, _ V1) bool { return !keys.Contains(key) })
+		m.DeleteFunc(keys.Missing)
 	}
 }
 
@@ -143,7 +143,7 @@ func (m MapSet[K, V]) ContainsAll(keys iter.Seq[K]) bool {
 }
 
 // Insert adds the key with a zero value if it is not already present.
-// It reports whether len(m) changed.
+// Returns whether the set changed.
 //
 // Related:
 //   - [Collect] to build a map from a sequence with a default value
@@ -157,7 +157,7 @@ func (m MapSet[K, V]) Insert(key K) bool {
 }
 
 // Delete removes the key.
-// It reports whether len(m) changed.
+// Returns whether the set changed.
 //
 // Related:
 //   - [MapSet.DifferenceWith] for many keys
@@ -168,8 +168,8 @@ func (m MapSet[K, V]) Delete(key K) bool {
 	return len(m) < size
 }
 
-// DeleteFunc deletes keys for which del returns true.
-// It reports whether len(m) changed.
+// DeleteFunc deletes keys for which the predicate returns true.
+// Returns whether the set changed.
 //
 // Related:
 //   - [maps.DeleteFunc] for a key-value predicate
@@ -180,9 +180,7 @@ func (m MapSet[K, V]) DeleteFunc(del func(K) bool) bool {
 }
 
 func (m MapSet[K, V]) toggle(key K, value V) {
-	if m.Contains(key) {
-		delete(m, key)
-	} else {
+	if !m.Delete(key) {
 		m[key] = value
 	}
 }
@@ -198,8 +196,7 @@ func (m MapSet[K, V]) Toggle(keys iter.Seq[K], value V) {
 	}
 }
 
-// SymmetricDifferenceWith updates the receiver to the symmetric difference with keys.
-// Keys present in both are removed; keys only in keys are inserted with their values.
+// SymmetricDifferenceWith removes present keys and inserts missing keys with values.
 //
 // Related:
 //   - [MapSet.Toggle] for a sequence
@@ -293,7 +290,7 @@ func Collect[K comparable, V any](keys iter.Seq[K], value V) MapSet[K, V] {
 func Set[K comparable](keys ...K) MapSet[K, struct{}] {
 	s := make(MapSet[K, struct{}], len(keys))
 	for _, key := range keys {
-		s[key] = struct{}{}
+		s.add(key)
 	}
 	return s
 }
@@ -325,7 +322,7 @@ func Index[K comparable](keys iter.Seq[K]) MapSet[K, int] {
 // Related:
 //   - [Compact] if the keys are already grouped
 func Count[K comparable](keys iter.Seq[K]) MapSet[K, int] {
-	m := map[K]int{}
+	m := MapSet[K, int]{}
 	for key := range keys {
 		m[key] += 1
 	}
